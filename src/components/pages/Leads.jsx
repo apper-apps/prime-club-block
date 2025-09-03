@@ -122,9 +122,9 @@ const handleStatusChange = async (leadId, newStatus) => {
 toast.success(`Lead status updated and deal moved to ${targetStage} stage!`);
           } else {
             // Create new deal in the target stage
-            const dealData = {
-              name: `${updatedLead.websiteUrl} Deal`,
-              leadName: updatedLead.websiteUrl.replace(/^https?:\/\//, '').replace(/\/$/, ''),
+const dealData = {
+              name: updatedLead.productName || `${updatedLead.websiteUrl} Deal`,
+              leadName: updatedLead.name || updatedLead.websiteUrl.replace(/^https?:\/\//, '').replace(/\/$/, ''),
               leadId: leadId.toString(),
               value: updatedLead.arr || 0,
               stage: targetStage,
