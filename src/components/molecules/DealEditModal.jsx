@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
+import { getSalesReps } from "@/services/api/salesRepService";
 import Card from "@/components/atoms/Card";
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
@@ -37,11 +38,7 @@ const DealEditModal = ({ isOpen, onClose, deal, onSave }) => {
     "Black Edition"
   ];
 
-  const salesReps = [
-    "Sarah Johnson",
-    "Mike Davis",
-    "Tom Wilson"
-  ];
+const [salesReps, setSalesReps] = useState([]);
 
   const months = [
     { value: 1, label: "January" },
@@ -58,6 +55,22 @@ const DealEditModal = ({ isOpen, onClose, deal, onSave }) => {
     { value: 12, label: "December" }
   ];
 
+useEffect(() => {
+    const loadSalesReps = async () => {
+      try {
+        const reps = await getSalesReps();
+        setSalesReps(reps);
+      } catch (error) {
+        console.error("Failed to load sales reps:", error);
+        toast.error("Failed to load sales representatives");
+      }
+    };
+
+    if (isOpen) {
+      loadSalesReps();
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (deal && isOpen) {
       setFormData({
@@ -70,10 +83,9 @@ const DealEditModal = ({ isOpen, onClose, deal, onSave }) => {
         startMonth: deal.startMonth?.toString() || "",
         endMonth: deal.endMonth?.toString() || ""
       });
-      setErrors({});
     }
+    setErrors({});
   }, [deal, isOpen]);
-
   const validateForm = () => {
     const newErrors = {};
     
@@ -274,10 +286,10 @@ const DealEditModal = ({ isOpen, onClose, deal, onSave }) => {
                       className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
                         errors.assignedRep ? "border-red-500" : ""
                       }`}
-                    >
+>
                       <option value="">Select rep</option>
                       {salesReps.map(rep => (
-                        <option key={rep} value={rep}>{rep}</option>
+                        <option key={rep.Id} value={rep.name}>{rep.name}</option>
                       ))}
                     </select>
                     {errors.assignedRep && (

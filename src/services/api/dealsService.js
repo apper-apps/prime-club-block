@@ -1,6 +1,8 @@
 import dealsData from "@/services/mockData/deals.json";
+import salesRepData from "@/services/mockData/salesReps.json";
 
 let deals = [...dealsData];
+let salesReps = [...salesRepData];
 
 export const getDeals = async (year = null) => {
   // Simulate API delay
