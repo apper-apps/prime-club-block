@@ -1,6 +1,9 @@
-// Dashboard Service - Centralized data management for dashboard components
+import { getLeadsAnalytics, getUserPerformance } from "@/services/api/analyticsService";
+import { getLeads, getPendingFollowUps } from "@/services/api/leadsService";
+import { getWebsiteUrlActivity } from "@/services/api/reportService";
 import salesRepsData from "@/services/mockData/salesReps.json";
 import dashboardData from "@/services/mockData/dashboard.json";
+// Dashboard Service - Centralized data management for dashboard components
 
 // Standardized API delay for consistent UX
 const API_DELAY = 300;
@@ -142,7 +145,7 @@ export const getPendingFollowUps = async () => {
   }, fallback);
 };
 
-// Lead performance chart data
+// Lead performance chart data - using fresh leads data
 export const getLeadPerformanceChart = async () => {
   await simulateAPICall();
   
@@ -152,19 +155,39 @@ export const getLeadPerformanceChart = async () => {
   };
   
   return safeServiceCall(async () => {
-    const { getDailyLeadsChart } = await import("@/services/api/analyticsService");
-    const chartData = await getDailyLeadsChart('all', 14);
+    const { getLeads } = await import("@/services/api/leadsService");
+    const leadsData = await getLeads();
     
-    if (!chartData || !chartData.categories || !chartData.series) {
+    if (!leadsData?.leads || !Array.isArray(leadsData.leads)) {
       return fallback;
     }
     
+    const leads = leadsData.leads;
+    
+    // Group leads by day of week for the last 7 days
+    const today = new Date();
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() - (6 - i));
+      return date;
+    });
+    
+    const dailyCounts = last7Days.map(date => {
+      const dateStr = date.toISOString().split('T')[0];
+      return leads.filter(lead => {
+        if (!lead.createdAt) return false;
+        const leadDate = lead.createdAt.split('T')[0];
+        return leadDate === dateStr;
+      }).length;
+    });
+    
+    const categories = last7Days.map(date => 
+      date.toLocaleDateString('en-US', { weekday: 'short' })
+    );
+    
     return {
-      categories: chartData.categories,
-      series: chartData.series.map(series => ({
-        name: series.name || 'Leads',
-        data: Array.isArray(series.data) ? series.data : []
-      }))
+      categories,
+      series: [{ name: 'Leads', data: dailyCounts }]
     };
   }, fallback);
 };
@@ -350,6 +373,7 @@ export const getDetailedRecentActivity = async () => {
 };
 
 // User leads report with period filtering
+// User leads report with period filtering - ensures latest field updates
 export const getUserLeadsReport = async (userId, period = 'today') => {
   await simulateAPICall();
   
@@ -387,15 +411,25 @@ export const getUserLeadsReport = async (userId, period = 'today') => {
       return leadDate >= startDate && leadDate < endDate;
     });
     
-    // Sort by creation date (most recent first) and ensure data integrity
+    // Sort by creation date (most recent first) and ensure all latest fields are included
     return filteredLeads
       .map(lead => ({
         ...lead,
         Id: lead.Id || Math.random(),
         websiteUrl: lead.websiteUrl || 'Unknown URL',
         category: lead.category || 'General',
-        createdAt: lead.createdAt || new Date().toISOString()
-      }))
+        createdAt: lead.createdAt || new Date().toISOString(),
+        productName: lead.productName || '',
+        name: lead.name || '',
+        teamSize: lead.teamSize || '1-3',
+        arr: lead.arr || 0,
+        linkedinUrl: lead.linkedinUrl || '',
+        status: lead.status || 'Keep an Eye',
+        fundingType: lead.fundingType || 'Bootstrapped',
+        edition: lead.edition || 'Select Edition',
+        followUpDate: lead.followUpDate || null,
+        addedByName: lead.addedByName || 'Unknown'
+}))
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }, fallback);
 };

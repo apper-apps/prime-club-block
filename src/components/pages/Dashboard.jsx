@@ -26,13 +26,15 @@ import {
   getTeamPerformanceRankings, 
   getTodaysMeetings 
 } from "@/services/api/dashboardService";
+import { getDailyLeadsReport } from "@/services/api/leadsService";
 const Dashboard = () => {
   const navigate = useNavigate();
   const [metrics, setMetrics] = useState([]);
   const [activity, setActivity] = useState([]);
   const [meetings, setMeetings] = useState([]);
   const [pendingFollowUps, setPendingFollowUps] = useState([]);
-  const [leadChart, setLeadChart] = useState(null);
+const [leadChart, setLeadChart] = useState(null);
+  const [dailyLeadsData, setDailyLeadsData] = useState([]);
   const [teamPerformance, setTeamPerformance] = useState([]);
 const [revenueTrends, setRevenueTrends] = useState(null);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -48,7 +50,7 @@ const [revenueTrends, setRevenueTrends] = useState(null);
   const [dailyUrls, setDailyUrls] = useState([]);
   const [dailyLoading, setDailyLoading] = useState(false);
   const [showCustomDate, setShowCustomDate] = useState(false);
-  const loadDashboardData = async () => {
+const loadDashboardData = async () => {
     try {
       setLoading(true);
       setError("");
@@ -61,7 +63,8 @@ const [
         leadChartData,
         teamPerformanceData,
         revenueTrendsData,
-        detailedActivityData
+        detailedActivityData,
+        dailyLeadsReportData
 ] = await Promise.all([
         getDashboardMetrics(),
         getRecentActivity(),
@@ -70,7 +73,8 @@ const [
 getLeadPerformanceChart(),
         getTeamPerformanceRankings(),
         getRevenueTrendsData(selectedYear),
-        getDetailedRecentActivity()
+        getDetailedRecentActivity(),
+        getDailyLeadsReport()
       ]);
       
 setMetrics(metricsData);
@@ -81,6 +85,7 @@ setMetrics(metricsData);
       setTeamPerformance(teamPerformanceData);
       setRevenueTrends(revenueTrendsData);
       setDetailedActivity(detailedActivityData);
+      setDailyLeadsData(dailyLeadsReportData);
     } catch (err) {
       setError("Failed to load dashboard data");
     } finally {
@@ -100,7 +105,7 @@ const loadSalesReps = async () => {
     }
   };
 
-  const loadDailyData = async (repId = selectedSalesRep?.Id, dateFilter = dailyDateFilter, customDateValue = customDate) => {
+const loadDailyData = async (repId = selectedSalesRep?.Id, dateFilter = dailyDateFilter, customDateValue = customDate) => {
     if (!repId) return;
     
     try {
@@ -117,8 +122,21 @@ const loadSalesReps = async () => {
         targetDate = customDateValue;
       }
       
-      const data = await getDailyWebsiteUrls(repId, targetDate);
-      setDailyUrls(data);
+      // Load fresh daily data from leads service and website URLs
+      const [websiteUrlsData, leadsReportData] = await Promise.all([
+        getDailyWebsiteUrls(repId, targetDate),
+        getDailyLeadsReport()
+      ]);
+      
+      // Filter leads report data by selected sales rep and date
+      const filteredLeadsData = leadsReportData.find(rep => rep.salesRepId === repId)?.leads || [];
+      const dateFilteredLeads = filteredLeadsData.filter(lead => {
+        if (!targetDate) return true;
+        const leadDate = lead.createdAt.split('T')[0];
+        return leadDate === targetDate;
+      });
+      
+      setDailyUrls(websiteUrlsData);
       
     } catch (err) {
       toast.error("Failed to load daily data");
@@ -214,7 +232,7 @@ useEffect(() => {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-lg font-semibold text-gray-900">Lead Performance</h3>
-              <p className="text-sm text-gray-600">Daily lead generation trends</p>
+              <p className="text-sm text-gray-600">Daily lead generation trends from latest data</p>
             </div>
             <ApperIcon name="TrendingUp" size={20} className="text-primary-600" />
           </div>
@@ -293,10 +311,14 @@ useEffect(() => {
             </label>
             <div className="relative">
               <select
-                value={selectedSalesRep?.Id || ''}
+value={selectedSalesRep?.Id || ''}
                 onChange={(e) => {
                   const rep = salesReps.find(r => r.Id === parseInt(e.target.value));
-                  if (rep) handleSalesRepChange(rep);
+                  if (rep) {
+                    handleSalesRepChange(rep);
+                    // Refresh daily data with updated leads
+                    loadDailyData(rep.Id, dailyDateFilter, customDate);
+                  }
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               >
@@ -355,7 +377,7 @@ useEffect(() => {
                     {dailyUrls.length >= 10 ? 'Target Met' : 'Below Target'}
                   </span>
                 </div>
-                {dailyUrls.slice(0, 10).map((url, index) => (
+{dailyUrls.slice(0, 10).map((url, index) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, y: 10 }}
@@ -367,7 +389,9 @@ useEffect(() => {
                       <div className="font-medium text-gray-900 text-sm">
                         {url.websiteUrl.replace(/^https?:\/\//, "").replace(/\/$/, "")}
                       </div>
-                      <div className="text-xs text-gray-500">{url.category}</div>
+                      <div className="text-xs text-gray-500">
+                        {url.category} • {url.productName || 'No product name'}
+                      </div>
                     </div>
                     <div className="text-right space-y-1">
                       <Badge 
@@ -382,7 +406,7 @@ useEffect(() => {
                         {url.status}
                       </Badge>
                       <div className="text-xs text-gray-500">
-                        {new Date(url.createdAt).toLocaleDateString()}
+                        {new Date(url.createdAt).toLocaleDateString()} • ARR: ${url.arr || 0}
                       </div>
                     </div>
                   </motion.div>
