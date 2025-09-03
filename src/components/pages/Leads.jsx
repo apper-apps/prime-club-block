@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
+import { createLead, deleteLead, getLeads, updateLead } from "@/services/api/leadsService";
+import { createDeal, getDeals, updateDeal } from "@/services/api/dealsService";
 import ApperIcon from "@/components/ApperIcon";
+import SearchBar from "@/components/molecules/SearchBar";
+import Error from "@/components/ui/Error";
+import Empty from "@/components/ui/Empty";
+import Loading from "@/components/ui/Loading";
+import Hotlist from "@/components/pages/Hotlist";
+import Input from "@/components/atoms/Input";
 import Badge from "@/components/atoms/Badge";
 import Button from "@/components/atoms/Button";
 import Card from "@/components/atoms/Card";
-import Input from "@/components/atoms/Input";
-import Empty from "@/components/ui/Empty";
-import Error from "@/components/ui/Error";
-import Loading from "@/components/ui/Loading";
-import SearchBar from "@/components/molecules/SearchBar";
-import { createLead, deleteLead, getLeads, updateLead } from "@/services/api/leadsService";
-import { createDeal, getDeals, updateDeal } from "@/services/api/dealsService";
 
 const Leads = () => {
   const [data, setData] = useState([]);
@@ -22,7 +23,7 @@ const [searchTerm, setSearchTerm] = useState("");
   const [fundingFilter, setFundingFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [teamSizeFilter, setTeamSizeFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("websiteUrl");
+const [sortBy, setSortBy] = useState("productName");
   const [sortOrder, setSortOrder] = useState("desc");
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingLead, setEditingLead] = useState(null);
@@ -281,7 +282,9 @@ const handleFieldUpdate = async (leadId, field, value) => {
 const addEmptyRow = () => {
     const newEmptyRow = {
       Id: nextTempId,
-websiteUrl: "",
+productName: "",
+      name: "",
+      websiteUrl: "",
       teamSize: "1-3", 
       arr: 0,
       category: "Accounting Software",
@@ -357,6 +360,8 @@ const handleEmptyRowUpdate = async (tempId, field, value) => {
         if (urls.length === 1) {
           // Single URL - existing behavior
           const leadData = {
+productName: emptyRow.productName,
+            name: emptyRow.name,
             websiteUrl: urls[0],
             teamSize: emptyRow.teamSize,
             arr: emptyRow.arr,
@@ -381,6 +386,8 @@ const handleEmptyRowUpdate = async (tempId, field, value) => {
           for (const url of urls) {
             try {
               const leadData = {
+productName: emptyRow.productName,
+                name: emptyRow.name,
                 websiteUrl: url,
                 teamSize: emptyRow.teamSize,
                 arr: emptyRow.arr,
@@ -597,12 +604,13 @@ const getStatusColor = (status) => {
   };
 
 const filteredAndSortedData = data
-    .filter(lead => {
+.filter(lead => {
       const matchesSearch = !searchTerm || 
+        lead.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         lead.websiteUrl.toLowerCase().includes(searchTerm.toLowerCase()) ||
         lead.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
         lead.teamSize.toLowerCase().includes(searchTerm.toLowerCase());
-      
       const matchesStatus = statusFilter === "all" || lead.status === statusFilter;
       const matchesFunding = fundingFilter === "all" || lead.fundingType === fundingFilter;
       const matchesCategory = categoryFilter === "all" || lead.category === categoryFilter;
@@ -770,7 +778,7 @@ icon="Building2" /> : <div className="relative">
             >
                 <table className="w-full min-w-[1200px]">
                     <thead className="bg-gray-50">
-                        <tr>
+<tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[50px]">
                                 <input
                                     type="checkbox"
@@ -778,6 +786,22 @@ icon="Building2" /> : <div className="relative">
                                     onChange={toggleSelectAll}
                                     className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                                 />
+                            </th>
+                            <th
+                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[200px]">
+                                <button
+                                    onClick={() => handleSort("productName")}
+                                    className="flex items-center gap-1 hover:text-gray-700">Product Name
+                                                            <ApperIcon name="ArrowUpDown" size={12} />
+                                </button>
+                            </th>
+                            <th
+                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[150px]">
+                                <button
+                                    onClick={() => handleSort("name")}
+                                    className="flex items-center gap-1 hover:text-gray-700">Name
+                                                            <ApperIcon name="ArrowUpDown" size={12} />
+                                </button>
                             </th>
                             <th
                                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[200px]">
@@ -836,6 +860,40 @@ emptyRow => <tr key={`empty-${emptyRow.Id}`} className="hover:bg-gray-50 empty-r
                                         disabled
                                         className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 opacity-50"
                                     />
+                                </td>
+<td className="px-6 py-4 whitespace-nowrap min-w-[200px]">
+                                    <Input
+                                        type="text"
+                                        value={emptyRow.productName}
+                                        onChange={e => setEmptyRows(prev => prev.map(row => row.Id === emptyRow.Id ? {
+                                            ...row,
+                                            productName: e.target.value
+                                        } : row))}
+                                        onBlur={e => handleEmptyRowUpdate(emptyRow.Id, "productName", e.target.value)}
+                                        onKeyDown={e => {
+                                            if (e.key === "Enter") {
+                                                handleEmptyRowUpdate(emptyRow.Id, "productName", e.target.value);
+                                            }
+                                        }}
+                                        placeholder="Enter product name..."
+                                        className="border-0 bg-transparent p-1 hover:bg-gray-50 focus:bg-white focus:border-gray-300 text-primary-600 font-medium placeholder-gray-400" />
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap min-w-[150px]">
+                                    <Input
+                                        type="text"
+                                        value={emptyRow.name}
+                                        onChange={e => setEmptyRows(prev => prev.map(row => row.Id === emptyRow.Id ? {
+                                            ...row,
+                                            name: e.target.value
+                                        } : row))}
+                                        onBlur={e => handleEmptyRowUpdate(emptyRow.Id, "name", e.target.value)}
+                                        onKeyDown={e => {
+                                            if (e.key === "Enter") {
+                                                handleEmptyRowUpdate(emptyRow.Id, "name", e.target.value);
+                                            }
+                                        }}
+                                        placeholder="Enter name..."
+                                        className="border-0 bg-transparent p-1 hover:bg-gray-50 focus:bg-white focus:border-gray-300 text-primary-600 font-medium placeholder-gray-400" />
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap min-w-[200px]">
                                     <Input
@@ -975,6 +1033,46 @@ emptyRow => <tr key={`empty-${emptyRow.Id}`} className="hover:bg-gray-50 empty-r
                                     onChange={() => toggleLeadSelection(lead.Id)}
                                     className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                                 />
+</td>
+                            <td className="px-6 py-4 whitespace-nowrap min-w-[200px]">
+                                <Input
+                                    type="text"
+                                    value={lead.productName}
+                                    onChange={e => {
+                                        setData(prevData => prevData.map(l => l.Id === lead.Id ? {
+                                            ...l,
+                                            productName: e.target.value
+                                        } : l));
+
+                                        handleFieldUpdateDebounced(lead.Id, "productName", e.target.value);
+                                    }}
+                                    onBlur={e => handleFieldUpdate(lead.Id, "productName", e.target.value)}
+                                    onKeyDown={e => {
+                                        if (e.key === "Enter") {
+                                            handleFieldUpdate(lead.Id, "productName", e.target.value);
+                                        }
+                                    }}
+                                    className="border-0 bg-transparent p-1 hover:bg-gray-50 focus:bg-white focus:border-gray-300 text-primary-600 font-medium" />
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap min-w-[150px]">
+                                <Input
+                                    type="text"
+                                    value={lead.name}
+                                    onChange={e => {
+                                        setData(prevData => prevData.map(l => l.Id === lead.Id ? {
+                                            ...l,
+                                            name: e.target.value
+                                        } : l));
+
+                                        handleFieldUpdateDebounced(lead.Id, "name", e.target.value);
+                                    }}
+                                    onBlur={e => handleFieldUpdate(lead.Id, "name", e.target.value)}
+                                    onKeyDown={e => {
+                                        if (e.key === "Enter") {
+                                            handleFieldUpdate(lead.Id, "name", e.target.value);
+                                        }
+                                    }}
+                                    className="border-0 bg-transparent p-1 hover:bg-gray-50 focus:bg-white focus:border-gray-300 text-primary-600 font-medium" />
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap min-w-[200px]">
                                 <Input
@@ -1332,6 +1430,8 @@ const SearchableSelect = ({ value, onChange, options, placeholder = "Select...",
 
 const AddLeadModal = ({ onClose, onSubmit, categoryOptions, onCreateCategory }) => {
   const [formData, setFormData] = useState({
+productName: "",
+    name: "",
     websiteUrl: "",
     teamSize: "1-3",
     arr: "",
@@ -1359,8 +1459,34 @@ const AddLeadModal = ({ onClose, onSubmit, categoryOptions, onCreateCategory }) 
             <ApperIcon name="X" size={20} />
           </button>
         </div>
-        
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+<form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Product Name
+              <span className="text-red-500">*</span>
+            </label>
+            <Input
+              type="text"
+              value={formData.productName}
+              onChange={(e) => setFormData(prev => ({ ...prev, productName: e.target.value }))}
+              placeholder="Enter product name..."
+              required
+              className="w-full"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Name
+              <span className="text-red-500">*</span>
+            </label>
+            <Input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              placeholder="Enter name..."
+              required
+              className="w-full"
+            />
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Website URL
@@ -1511,7 +1637,9 @@ const AddLeadModal = ({ onClose, onSubmit, categoryOptions, onCreateCategory }) 
 };
 
 const EditLeadModal = ({ lead, onClose, onSubmit, categoryOptions, onCreateCategory }) => {
-  const [formData, setFormData] = useState({
+const [formData, setFormData] = useState({
+    productName: lead.productName || "",
+    name: lead.name || "",
     websiteUrl: lead.websiteUrl,
     teamSize: lead.teamSize,
     arr: lead.arr.toString(),
@@ -1540,7 +1668,35 @@ const EditLeadModal = ({ lead, onClose, onSubmit, categoryOptions, onCreateCateg
                 <ApperIcon name="X" size={20} />
             </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+<form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Product Name
+                    <span className="text-red-500">*</span>
+                </label>
+                <Input
+                    type="text"
+                    value={formData.productName}
+                    onChange={(e) => setFormData(prev => ({ ...prev, productName: e.target.value }))}
+                    placeholder="Enter product name..."
+                    required
+                    className="w-full"
+                />
+            </div>
+            
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name
+                    <span className="text-red-500">*</span>
+                </label>
+                <Input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Enter name..."
+                    required
+                    className="w-full"
+                />
+            </div>
+            
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Website URL
                                 </label>
