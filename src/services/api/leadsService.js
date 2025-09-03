@@ -100,8 +100,8 @@ export const createLead = async (leadData) => {
 // Update history tracker for new lead
   leadHistoryTracker.set(normalizedUrl, true);
   const maxId = Math.max(...leads.map(l => l.Id), 0);
-  const newLead = {
-productName: leadData.productName || "",
+const newLead = {
+    productName: leadData.productName || "",
     name: leadData.name || "",
     websiteUrl: leadData.websiteUrl,
 teamSize: leadData.teamSize || "1-3",
