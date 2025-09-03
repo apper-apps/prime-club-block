@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Chart from "react-apexcharts";
+import { getDailyLeadsChart, getLeadsAnalytics, getLeadsMetrics, getUserPerformance } from "@/services/api/analyticsService";
+import { getLeads } from "@/services/api/leadsService";
+import salesRepData from "@/services/mockData/salesReps.json";
 import ApperIcon from "@/components/ApperIcon";
-import Button from "@/components/atoms/Button";
-import Card from "@/components/atoms/Card";
+import MetricCard from "@/components/molecules/MetricCard";
 import Error from "@/components/ui/Error";
 import Loading from "@/components/ui/Loading";
 import Leads from "@/components/pages/Leads";
-import MetricCard from "@/components/molecules/MetricCard";
-import salesRepData from "@/services/mockData/salesReps.json";
-import { getDailyLeadsChart, getLeadsAnalytics, getLeadsMetrics, getUserPerformance } from "@/services/api/analyticsService";
-import { getLeads } from "@/services/api/leadsService";
+import Button from "@/components/atoms/Button";
+import Card from "@/components/atoms/Card";
 
 const Analytics = () => {
   const [loading, setLoading] = useState(true);
@@ -348,14 +348,13 @@ useEffect(() => {
               {selectedUser !== 'all' && ` by ${salesRepData.find(r => r.Id.toString() === selectedUser)?.name}`}
             </p>
           </div>
-          
-<div className="space-y-3 max-h-96 overflow-y-auto">
+<div className="space-y-3">
             {filteredLeads && filteredLeads.length > 0 ? (
-              filteredLeads.slice(0, 10).map((lead) => (
-                <div key={lead.Id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+              filteredLeads.slice(0, 8).map((lead, index) => (
+                <div key={lead.id || index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-gray-900 truncate">
-                      {lead.websiteUrl?.replace(/^https?:\/\//, '') || 'Unknown URL'}
+                      {lead.productName || 'Unknown Product'}
                     </p>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs text-gray-500">
