@@ -122,8 +122,8 @@ export const getTodaysMeetings = async () => {
   }));
 };
 
-// Pending follow-ups from leads service
-export const getPendingFollowUps = async () => {
+// Pending follow-ups from leads service - using imported function
+const getDashboardPendingFollowUps = async () => {
   await simulateAPICall();
   
   const fallback = [];
@@ -144,6 +144,9 @@ export const getPendingFollowUps = async () => {
     }));
   }, fallback);
 };
+
+// Export the function with a unique name to avoid conflicts
+export { getDashboardPendingFollowUps as getPendingFollowUps };
 
 // Lead performance chart data - using fresh leads data
 export const getLeadPerformanceChart = async () => {
