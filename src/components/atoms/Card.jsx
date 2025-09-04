@@ -16,8 +16,8 @@ const Card = forwardRef(({
   return (
     <div
       ref={ref}
-      className={cn(
-        "rounded-xl transition-all duration-200 hover:shadow-lg",
+className={cn(
+        "rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-[1.01]",
         variants[variant],
         className
       )}

@@ -95,7 +95,7 @@ const getRankIcon = (rank) => {
         <div className="space-y-6">
           {/* Hunter of the Month */}
           {salesReps.length > 0 && (
-<Card className="p-6 bg-gradient-to-r from-primary-100 to-primary-200 border-primary-300">
+<Card className="p-6 bg-gradient-to-r from-primary-100 to-primary-200 border-primary-300 shadow-lg">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className="relative">
@@ -166,7 +166,7 @@ const getRankIcon = (rank) => {
                           <div className="flex items-center">
                             <Avatar name={rep.name} size="sm" />
                             <div className="ml-3">
-<div className="font-medium text-gray-900">{rep.name}</div>
+<div className="font-semibold text-gray-900">{rep.name}</div>
                               {rank === 1 && (
                                 <Badge variant="primary" size="sm">
                                   <ApperIcon name="Crown" size={12} className="mr-1" />
@@ -201,7 +201,7 @@ const getRankIcon = (rank) => {
 
           {/* Performance Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-<Card className="p-6 text-center">
+<Card className="p-6 text-center hover:bg-gray-50 transition-colors duration-200">
               <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <ApperIcon name="Users" size={24} className="text-primary-600" />
               </div>

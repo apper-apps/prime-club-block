@@ -45,11 +45,11 @@ const Avatar = forwardRef(({
       )}
       {...props}
     >
-      {hasValidSrc && showImage ? (
+{hasValidSrc && showImage ? (
         <img
           src={src}
           alt={alt || name || 'Avatar'}
-          className="w-full h-full object-cover rounded-full"
+          className="w-full h-full object-cover rounded-full transition-opacity duration-300"
           onError={handleImageError}
           loading="lazy"
         />
