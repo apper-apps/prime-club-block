@@ -828,8 +828,8 @@ icon="Building2" /> : <div className="relative">
                                 </button>
                             </th>
                             <th
-                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[150px]">Category
-                                                    </th>
+className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[150px]">Category
+                            </th>
                             <th
                                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">LinkedIn
                                                     </th>
@@ -942,15 +942,16 @@ emptyRow => <tr key={`empty-${emptyRow.Id}`} className="hover:bg-gray-50 empty-r
                                 </td>
                                 <td
                                     className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 min-w-[150px]">
-                                    <SearchableSelect
+<SearchableSelect
                                         value={emptyRow.category}
+                                        onChange={(value) => handleEmptyRowUpdate(emptyRow.Id, "category", value)}
                                         options={categoryOptions}
                                         placeholder="Select category..."
                                         className="text-gray-500"
                                         onCreateCategory={handleCreateCategory}
                                     />
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap min-w-[100px]">
+<td className="px-6 py-4 whitespace-nowrap min-w-[200px]">
                                     <Input
                                         type="url"
                                         value={emptyRow.linkedinUrl}
@@ -1130,14 +1131,15 @@ emptyRow => <tr key={`empty-${emptyRow.Id}`} className="hover:bg-gray-50 empty-r
                             </td>
                             <td
                                 className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 min-w-[150px]">
-                                <SearchableSelect
+<SearchableSelect
+                                    value={lead.category}
                                     onChange={(value) => handleFieldUpdate(lead.Id, "category", value)}
                                     options={categoryOptions}
                                     placeholder="Select category..."
                                     onCreateCategory={handleCreateCategory}
                                 />
                             </td>
-<td className="px-6 py-4 whitespace-nowrap min-w-[100px]">
+<td className="px-6 py-4 whitespace-nowrap min-w-[200px]">
                                 <div className="flex items-center gap-2">
                                     <Input
                                         type="url"
