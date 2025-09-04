@@ -148,26 +148,26 @@ function CRMApp() {
             >
               <Dashboard />
             </motion.div>
-          } />
+} />
           <Route path="/leads" element={
-initial={{ opacity: 0, y: 20 }}
-animate={{ opacity: 1, y: 0 }}
-transition={{ duration: 0.3 }}
->
-<Leads />
-</motion.div>
-} />
-<Route path="/hotlist" element={
-<motion.div
-initial={{ opacity: 0, y: 20 }}
-animate={{ opacity: 1, y: 0 }}
-transition={{ duration: 0.3 }}
->
-<Hotlist />
-</motion.div>
-} />
-<Route path="/deals" element={
-<motion.div
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Leads />
+            </motion.div>
+          } />
+          <Route path="/hotlist" element={
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Hotlist />
+            </motion.div>
+          } />
+          <Route path="/deals" element={
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
