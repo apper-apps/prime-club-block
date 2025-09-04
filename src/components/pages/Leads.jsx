@@ -1453,8 +1453,8 @@ productName: "",
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-<div className="bg-white rounded-lg shadow-xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+<div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 p-4">
+<div className="bg-white rounded-lg shadow-xl w-full max-w-4xl mx-auto max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b">
           <h3 className="text-lg font-semibold">Add New Lead</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
@@ -1682,8 +1682,8 @@ const [formData, setFormData] = useState({
 
   return (
     <div
-    className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-    <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b">
             <h3 className="text-lg font-semibold">Edit Lead</h3>
             <button onClick={onClose} className="text-gray-400 hover:text-gray-600">

@@ -172,11 +172,11 @@ useEffect(() => {
             onClick={handleClose}
           />
           
-          <motion.div
+<motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            className="relative w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto"
           >
             <Card className="p-6">
               <div className="flex items-center justify-between mb-6">
