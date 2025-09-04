@@ -1452,181 +1452,201 @@ productName: "",
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+<div className="bg-white rounded-lg shadow-xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b">
           <h3 className="text-lg font-semibold">Add New Lead</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <ApperIcon name="X" size={20} />
           </button>
         </div>
-<form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Product Name
-              <span className="text-red-500">*</span>
-            </label>
-            <Input
-              type="text"
-              value={formData.productName}
-              onChange={(e) => setFormData(prev => ({ ...prev, productName: e.target.value }))}
-              placeholder="Enter product name..."
-              required
-              className="w-full"
-            />
+<form onSubmit={handleSubmit} className="p-6">
+          {/* Basic Information Section */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Product Name
+                  <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  type="text"
+                  value={formData.productName}
+                  onChange={(e) => setFormData(prev => ({ ...prev, productName: e.target.value }))}
+                  placeholder="Enter product name..."
+                  required
+                  className="w-full"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name
+                  <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Enter name..."
+                  required
+                  className="w-full"
+                />
+              </div>
+            </div>
           </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name
-              <span className="text-red-500">*</span>
-            </label>
-            <Input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              placeholder="Enter name..."
-              required
-              className="w-full"
-            />
+
+          {/* Company Information Section */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Company Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Website URL
+                </label>
+                <Input
+                  type="url"
+                  value={formData.websiteUrl}
+                  detectUrlPrefix={true}
+                  urlPrefix="https://"
+                  onChange={(e) => setFormData({...formData, websiteUrl: e.target.value})}
+                  placeholder="https://example.com"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  LinkedIn URL
+                </label>
+                <Input
+                  type="url"
+                  value={formData.linkedinUrl}
+                  onChange={(e) => setFormData({...formData, linkedinUrl: e.target.value})}
+                  placeholder="https://linkedin.com/company/example"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Team Size
+                </label>
+                <select
+                  value={formData.teamSize}
+                  onChange={(e) => setFormData({...formData, teamSize: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="1-3">1-3</option>
+                  <option value="4-10">4-10</option>
+                  <option value="11-50">11-50</option>
+                  <option value="51-100">51-100</option>
+                  <option value="101-500">101-500</option>
+                  <option value="500+">500+</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  ARR (USD)
+                </label>
+                <Input
+                  type="number"
+                  value={formData.arr}
+                  onChange={(e) => setFormData({...formData, arr: e.target.value})}
+                  placeholder="150000"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Funding Type
+                </label>
+                <select
+                  value={formData.fundingType}
+                  onChange={(e) => setFormData({...formData, fundingType: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="Bootstrapped">Bootstrapped</option>
+                  <option value="Pre-seed">Pre-seed</option>
+                  <option value="Y Combinator">Y Combinator</option>
+                  <option value="Angel">Angel</option>
+                  <option value="Series A">Series A</option>
+                  <option value="Series B">Series B</option>
+                  <option value="Series C">Series C</option>
+                </select>
+              </div>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Website URL
-</label>
-            <Input
-              type="url"
-              value={formData.websiteUrl}
-              detectUrlPrefix={true}
-              urlPrefix="https://"
-              onChange={(e) => setFormData({...formData, websiteUrl: e.target.value})}
-              placeholder="https://example.com"
-              required
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Team Size
-</label>
-            <select
-              value={formData.teamSize}
-              onChange={(e) => setFormData({...formData, teamSize: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-<option value="1-3">1-3</option>
-              <option value="4-10">4-10</option>
-              <option value="11-50">11-50</option>
-              <option value="51-100">51-100</option>
-              <option value="101-500">101-500</option>
-              <option value="500+">500+</option>
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              ARR (USD)
-            </label>
-            <Input
-              type="number"
-              value={formData.arr}
-              onChange={(e) => setFormData({...formData, arr: e.target.value})}
-              placeholder="150000"
-              required
-            />
-          </div>
-<div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Category
-            </label>
-            <div className="relative">
-              <SearchableSelect
-                value={formData.category}
-                onChange={(value) => setFormData({...formData, category: value})}
-                options={categoryOptions}
-                placeholder="Select category..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                onCreateCategory={onCreateCategory}
-              />
+
+          {/* Status & Category Section */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Status & Category</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Category
+                </label>
+                <div className="relative">
+                  <SearchableSelect
+                    value={formData.category}
+                    onChange={(value) => setFormData({...formData, category: value})}
+                    options={categoryOptions}
+                    placeholder="Select category..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    onCreateCategory={onCreateCategory}
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status
+                </label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData({...formData, status: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="Launched on AppSumo">Launched on AppSumo</option>
+                  <option value="Launched on Prime Club">Launched on Prime Club</option>
+                  <option value="Keep an Eye">Keep an Eye</option>
+                  <option value="Rejected">Rejected</option>
+                  <option value="Unsubscribed">Unsubscribed</option>
+                  <option value="Outdated">Outdated</option>
+                  <option value="Hotlist">Hotlist</option>
+                  <option value="Out of League">Out of League</option>
+                  <option value="Connected">Connected</option>
+                  <option value="Locked">Locked</option>
+                  <option value="Meeting Booked">Meeting Booked</option>
+                  <option value="Meeting Done">Meeting Done</option>
+                  <option value="Negotiation">Negotiation</option>
+                  <option value="Closed Lost">Closed Lost</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Edition
+                </label>
+                <select
+                  value={formData.edition}
+                  onChange={(e) => setFormData({...formData, edition: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="Select Edition">Select Edition</option>
+                  <option value="Black Edition">Black Edition</option>
+                  <option value="Collector's Edition">Collector's Edition</option>
+                  <option value="Limited Edition">Limited Edition</option>
+                </select>
+              </div>
             </div>
           </div>
           
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              LinkedIn URL
-            </label>
-            <Input
-              type="url"
-              value={formData.linkedinUrl}
-              onChange={(e) => setFormData({...formData, linkedinUrl: e.target.value})}
-              placeholder="https://linkedin.com/company/example"
-              required
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Status
-            </label>
-            <select
-              value={formData.status}
-              onChange={(e) => setFormData({...formData, status: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
->
-              <option value="Launched on AppSumo">Launched on AppSumo</option>
-              <option value="Launched on Prime Club">Launched on Prime Club</option>
-              <option value="Keep an Eye">Keep an Eye</option>
-              <option value="Rejected">Rejected</option>
-              <option value="Unsubscribed">Unsubscribed</option>
-              <option value="Outdated">Outdated</option>
-              <option value="Hotlist">Hotlist</option>
-              <option value="Out of League">Out of League</option>
-              <option value="Connected">Connected</option>
-              <option value="Locked">Locked</option>
-              <option value="Meeting Booked">Meeting Booked</option>
-              <option value="Meeting Done">Meeting Done</option>
-              <option value="Negotiation">Negotiation</option>
-              <option value="Closed Lost">Closed Lost</option>
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Funding Type
-            </label>
-            <select
-              value={formData.fundingType}
-              onChange={(e) => setFormData({...formData, fundingType: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="Bootstrapped">Bootstrapped</option>
-              <option value="Pre-seed">Pre-seed</option>
-              <option value="Y Combinator">Y Combinator</option>
-              <option value="Angel">Angel</option>
-              <option value="Series A">Series A</option>
-              <option value="Series B">Series B</option>
-              <option value="Series C">Series C</option>
-</select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Edition
-            </label>
-            <select
-              value={formData.edition}
-              onChange={(e) => setFormData({...formData, edition: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="Select Edition">Select Edition</option>
-              <option value="Black Edition">Black Edition</option>
-              <option value="Collector's Edition">Collector's Edition</option>
-              <option value="Limited Edition">Limited Edition</option>
-            </select>
-          </div>
-          
-          <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
+          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-200">
+            <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <Button type="submit">
+            <Button type="submit" className="w-full sm:w-auto">
               Add Lead
             </Button>
           </div>
@@ -1668,185 +1688,207 @@ const [formData, setFormData] = useState({
                 <ApperIcon name="X" size={20} />
             </button>
         </div>
-<form onSubmit={handleSubmit} className="p-6 space-y-4">
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Product Name
-                    <span className="text-red-500">*</span>
-                </label>
-                <Input
-                    type="text"
-                    value={formData.productName}
-                    onChange={(e) => setFormData(prev => ({ ...prev, productName: e.target.value }))}
-                    placeholder="Enter product name..."
-                    required
-                    className="w-full"
-                />
-            </div>
-            
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name
-                    <span className="text-red-500">*</span>
-                </label>
-                <Input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Enter name..."
-                    required
-                    className="w-full"
-                />
-            </div>
-            
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Website URL
-                                </label>
-                <Input
-                    type="url"
-                    value={formData.websiteUrl}
-                    detectUrlPrefix={true}
-                    urlPrefix="https://"
-                    onChange={e => setFormData({
-                        ...formData,
-                        websiteUrl: e.target.value
-                    })}
-required />
-            </div>
-            
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Team Size
-                </label>
-                <select
-                        value={formData.teamSize}
-                        onChange={e => setFormData({
-                            ...formData,
-                            teamSize: e.target.value
-})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
-<option value="1-3">1-3</option>
-                    <option value="4-10">4-10</option>
-                        <option value="11-50">11-50</option>
-                        <option value="51-100">51-100</option>
-                        <option value="101-500">101-500</option>
-                        <option value="500+">500+</option>
-                    </select>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">ARR (USD)
-                                    </label>
-                    <Input
-                        type="number"
-                        value={formData.arr}
-                        onChange={e => setFormData({
-                            ...formData,
-                            arr: e.target.value
-                        })}
-                        required />
-</div>
-            
-            <div>
-<label className="block text-sm font-medium text-gray-700 mb-1">Category
-                </label>
-                <div className="relative">
-                    <SearchableSelect
-                        value={formData.category}
-                        onChange={(value) => setFormData({
-                            ...formData,
-                                category: value
-                            })}
-                            options={categoryOptions}
-                            placeholder="Select category..."
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                            onCreateCategory={onCreateCategory}
+<form onSubmit={handleSubmit} className="p-6">
+            {/* Basic Information Section */}
+            <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Product Name
+                            <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                            type="text"
+                            value={formData.productName}
+                            onChange={(e) => setFormData(prev => ({ ...prev, productName: e.target.value }))}
+                            placeholder="Enter product name..."
+                            required
+                            className="w-full"
                         />
+                    </div>
+                    
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Name
+                            <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                            type="text"
+                            value={formData.name}
+                            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                            placeholder="Enter name..."
+                            required
+                            className="w-full"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Company Information Section */}
+            <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Company Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Website URL
+                        </label>
+                        <Input
+                            type="url"
+                            value={formData.websiteUrl}
+                            detectUrlPrefix={true}
+                            urlPrefix="https://"
+                            onChange={e => setFormData({
+                                ...formData,
+                                websiteUrl: e.target.value
+                            })}
+                            placeholder="https://example.com"
+                            required />
+                    </div>
+                    
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">LinkedIn URL
+                        </label>
+                        <Input
+                            type="url"
+                            value={formData.linkedinUrl}
+                            onChange={e => setFormData({
+                                ...formData,
+                                linkedinUrl: e.target.value
+                            })}
+                            placeholder="https://linkedin.com/company/example"
+                            required />
+                    </div>
+                    
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Team Size
+                        </label>
+                        <select
+                            value={formData.teamSize}
+                            onChange={e => setFormData({
+                                ...formData,
+                                teamSize: e.target.value
+                            })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <option value="1-3">1-3</option>
+                            <option value="4-10">4-10</option>
+                            <option value="11-50">11-50</option>
+                            <option value="51-100">51-100</option>
+                            <option value="101-500">101-500</option>
+                            <option value="500+">500+</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">ARR (USD)
+                        </label>
+                        <Input
+                            type="number"
+                            value={formData.arr}
+                            onChange={e => setFormData({
+                                ...formData,
+                                arr: e.target.value
+                            })}
+                            placeholder="150000"
+                            required />
+                    </div>
+                    
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Funding Type
+                        </label>
+                        <select
+                            value={formData.fundingType}
+                            onChange={e => setFormData({
+                                ...formData,
+                                fundingType: e.target.value
+                            })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <option value="Bootstrapped">Bootstrapped</option>
+                            <option value="Pre-seed">Pre-seed</option>
+                            <option value="Y Combinator">Y Combinator</option>
+                            <option value="Angel">Angel</option>
+                            <option value="Series A">Series A</option>
+                            <option value="Series B">Series B</option>
+                            <option value="Series C">Series C</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            {/* Status & Category Section */}
+            <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Status & Category</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Category
+                        </label>
+                        <div className="relative">
+                            <SearchableSelect
+                                value={formData.category}
+                                onChange={(value) => setFormData({
+                                    ...formData,
+                                    category: value
+                                })}
+                                options={categoryOptions}
+                                placeholder="Select category..."
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                onCreateCategory={onCreateCategory}
+                            />
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Status
+                        </label>
+                        <select
+                            value={formData.status}
+                            onChange={e => setFormData({
+                                ...formData,
+                                status: e.target.value
+                            })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <option value="Launched on AppSumo">Launched on AppSumo</option>
+                            <option value="Launched on Prime Club">Launched on Prime Club</option>
+                            <option value="Keep an Eye">Keep an Eye</option>
+                            <option value="Rejected">Rejected</option>
+                            <option value="Unsubscribed">Unsubscribed</option>
+                            <option value="Outdated">Outdated</option>
+                            <option value="Hotlist">Hotlist</option>
+                            <option value="Out of League">Out of League</option>
+                            <option value="Connected">Connected</option>
+                            <option value="Locked">Locked</option>
+                            <option value="Meeting Booked">Meeting Booked</option>
+                            <option value="Meeting Done">Meeting Done</option>
+                            <option value="Negotiation">Negotiation</option>
+                            <option value="Closed Lost">Closed Lost</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Edition
+                        </label>
+                        <select
+                            value={formData.edition}
+                            onChange={e => setFormData({
+                                ...formData,
+                                edition: e.target.value
+                            })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <option value="Select Edition">Select Edition</option>
+                            <option value="Black Edition">Black Edition</option>
+                            <option value="Collector's Edition">Collector's Edition</option>
+                            <option value="Limited Edition">Limited Edition</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">LinkedIn URL
-                                    </label>
-                    <Input
-                        type="url"
-                        value={formData.linkedinUrl}
-                        onChange={e => setFormData({
-                            ...formData,
-                            linkedinUrl: e.target.value
-                        })}
-required />
-            </div>
-            
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status
-                                    </label>
-                    <select
-                        value={formData.status}
-                        onChange={e => setFormData({
-                            ...formData,
-                            status: e.target.value
-                        })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
-                        <option value="Launched on AppSumo">Launched on AppSumo</option>
-                        <option value="Launched on Prime Club">Launched on Prime Club</option>
-                        <option value="Keep an Eye">Keep an Eye</option>
-                        <option value="Rejected">Rejected</option>
-                        <option value="Unsubscribed">Unsubscribed</option>
-                        <option value="Outdated">Outdated</option>
-                        <option value="Hotlist">Hotlist</option>
-                        <option value="Out of League">Out of League</option>
-                        <option value="Connected">Connected</option>
-                        <option value="Locked">Locked</option>
-                        <option value="Meeting Booked">Meeting Booked</option>
-                        <option value="Meeting Done">Meeting Done</option>
-                        <option value="Negotiation">Negotiation</option>
-                        <option value="Closed Lost">Closed Lost</option>
-</select>
-            </div>
-            
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Funding Type
-                                    </label>
-                    <select
-                        value={formData.fundingType}
-                        onChange={e => setFormData({
-                            ...formData,
-                            fundingType: e.target.value
-                        })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
-                        <option value="Bootstrapped">Bootstrapped</option>
-                        <option value="Pre-seed">Pre-seed</option>
-                        <option value="Y Combinator">Y Combinator</option>
-                        <option value="Angel">Angel</option>
-                        <option value="Series A">Series A</option>
-                        <option value="Series B">Series B</option>
-<option value="Series C">Series C</option>
-                    </select>
-            </div>
-            
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Edition
-                                    </label>
-                    <select
-                        value={formData.edition}
-                        onChange={e => setFormData({
-                            ...formData,
-                            edition: e.target.value
-                        })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
-                        <option value="Select Edition">Select Edition</option>
-                        <option value="Black Edition">Black Edition</option>
-                        <option value="Collector's Edition">Collector's Edition</option>
-                        <option value="Limited Edition">Limited Edition</option>
-</select>
-            </div>
-            
-            <div className="flex justify-end gap-3 pt-4">
-                <Button type="button" variant="outline" onClick={onClose}>
+            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-200">
+                <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto">
                     Cancel
                 </Button>
-                <Button type="submit">
+                <Button type="submit" className="w-full sm:w-auto">
                     Update Lead
                 </Button>
             </div>
-</form>
+        </form>
     </div>
 </div>
   );
