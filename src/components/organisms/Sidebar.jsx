@@ -10,7 +10,6 @@ const navigation = [
     { to: "/", icon: "BarChart3", label: "Dashboard" },
     { to: "/leads", icon: "Building2", label: "Leads" },
     { to: "/hotlist", icon: "Flame", label: "Hotlist" },
-    { to: "/deals", icon: "FileText", label: "Deals" },
     { to: "/pipeline", icon: "Kanban", label: "Deal Pipeline" },
     { to: "/calendar", icon: "Calendar", label: "Calendar" },
     { to: "/analytics", icon: "TrendingUp", label: "Analytics" },

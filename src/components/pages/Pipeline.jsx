@@ -2,17 +2,21 @@ import React, { useEffect, useState } from "react";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
-import { getDeals, updateDeal } from "@/services/api/dealsService";
 import ApperIcon from "@/components/ApperIcon";
-import DealCard from "@/components/molecules/DealCard";
-import DealEditModal from "@/components/molecules/DealEditModal";
-import Error from "@/components/ui/Error";
-import Empty from "@/components/ui/Empty";
-import Loading from "@/components/ui/Loading";
-import Deals from "@/components/pages/Deals";
 import Badge from "@/components/atoms/Badge";
 import Button from "@/components/atoms/Button";
 import Card from "@/components/atoms/Card";
+import Empty from "@/components/ui/Empty";
+import Error from "@/components/ui/Error";
+import Loading from "@/components/ui/Loading";
+import DealCard from "@/components/molecules/DealCard";
+import DealEditModal from "@/components/molecules/DealEditModal";
+import salesRepsData from "@/services/mockData/salesReps.json";
+import dashboardData from "@/services/mockData/dashboard.json";
+import dealsData from "@/services/mockData/deals.json";
+import leadsData from "@/services/mockData/leads.json";
+import contactsData from "@/services/mockData/contacts.json";
+import { getDeals, updateDeal } from "@/services/api/dealsService";
 
 const Pipeline = () => {
   const [deals, setDeals] = useState([]);
@@ -30,71 +34,65 @@ const Pipeline = () => {
     { id: "Lost", name: "Lost", color: "bg-gray-500" }
   ];
 
-const loadDeals = async () => {
-  try {
-    setLoading(true);
-    setError("");
-    
-    const data = await getDeals();
-    setDeals(data);
-  } catch (err) {
-    setError("Failed to load deals");
-    toast.error("Failed to load deals");
-  } finally {
-    setLoading(false);
-  }
+  const loadDeals = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      
+      const data = await getDeals();
+      setDeals(data);
+    } catch (err) {
+      setError("Failed to load deals");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDeals();
+  }, []);
+
+  const handleDragEnd = async (result) => {
+    const { destination, source, draggableId } = result;
+
+    if (!destination) return;
+
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+
+    const dealId = parseInt(draggableId);
+    const newStage = destination.droppableId;
+
+    try {
+      await updateDeal(dealId, { stage: newStage });
+      
+      const updatedDeals = deals.map(deal =>
+        deal.Id === dealId ? { ...deal, stage: newStage } : deal
+      );
+      setDeals(updatedDeals);
+      
+      toast.success(`Deal moved to ${newStage}`);
+    } catch (err) {
+      toast.error("Failed to update deal stage");
+    }
 };
 
-useEffect(() => {
-  loadDeals();
-}, []);
-
-const handleDragEnd = async (result) => {
-  if (!result.destination) return;
-
-  const { source, destination, draggableId } = result;
-  
-  if (source.droppableId === destination.droppableId) {
-    return;
-  }
-
-  const dealId = parseInt(draggableId);
-  const newStage = destination.droppableId;
-
-  try {
-    const updatedDeal = await updateDeal(dealId, { stage: newStage });
-    
-    const updatedDeals = deals.map(deal =>
-      deal.Id === dealId ? { ...deal, stage: newStage } : deal
-    );
-    setDeals(updatedDeals);
-    
-    toast.success(`Deal moved to ${newStage}`);
-  } catch (error) {
-    toast.error("Failed to update deal stage");
-  }
-};
-
-const getDealsForStage = (stage) => {
-  return deals.filter(deal => deal.stage === stage);
-};
-
-const getTotalValue = (stage) => {
-  const stageDeals = getDealsForStage(stage);
-  return stageDeals.reduce((total, deal) => total + (deal.value || 0), 0);
-};
-
-const formatCurrency = (amount) => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0
-  }).format(amount);
-};
-
-const handleEditDeal = (deal) => {
+  const handleEditDeal = (deal) => {
     setEditingDeal(deal);
     setShowEditModal(true);
+  };
+
+  const handleSaveDeal = async (dealId, updatedData) => {
+    const updatedDeal = await updateDeal(dealId, updatedData);
+    
+    const updatedDeals = deals.map(deal =>
+      deal.Id === dealId ? { ...deal, ...updatedData } : deal
+    );
+    setDeals(updatedDeals);
   };
 
   const handleCloseEditModal = () => {
@@ -102,32 +100,33 @@ const handleEditDeal = (deal) => {
     setEditingDeal(null);
   };
 
-  const handleSaveDeal = async (dealId, updatedData) => {
-    try {
-      const updatedDeal = await updateDeal(dealId, updatedData);
-      
-      const updatedDeals = deals.map(deal =>
-        deal.Id === dealId ? { ...deal, ...updatedData } : deal
-      );
-      setDeals(updatedDeals);
-      setShowEditModal(false);
-      setEditingDeal(null);
-    } catch (error) {
-      toast.error("Failed to update deal");
-    }
+  const getDealsForStage = (stage) => {
+    return deals.filter(deal => deal.stage === stage);
+  };
+  const getTotalValue = (stage) => {
+    const stageDeals = getDealsForStage(stage);
+    return stageDeals.reduce((sum, deal) => sum + deal.value, 0);
   };
 
-  if (loading) return <Loading />;
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 0
+    }).format(amount);
+  };
+
+  if (loading) return <Loading type="kanban" />;
   if (error) return <Error message={error} onRetry={loadDeals} />;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Deals Pipeline</h1>
-          <p className="text-gray-600">Manage your deals through the sales stages</p>
+          <h1 className="text-3xl font-bold text-gray-900">Deal Pipeline</h1>
+          <p className="text-gray-600 mt-1">Track and manage your sales opportunities</p>
         </div>
-        <Button onClick={() => toast.info("Add Deal feature coming soon!")}>
+        <Button>
           <ApperIcon name="Plus" size={16} className="mr-2" />
           Add Deal
         </Button>
@@ -174,14 +173,14 @@ const handleEditDeal = (deal) => {
                             <p className="text-sm">No deals in this stage</p>
                           </div>
                         ) : (
-stageDeals.map((deal, index) => (
-                          <DealCard
-                            key={deal.Id}
-                            deal={deal}
-                            index={index}
-                            onEdit={handleEditDeal}
-                          />
-                        ))
+                          stageDeals.map((deal, index) => (
+                            <DealCard
+key={deal.Id}
+                              deal={deal}
+                              index={index}
+                              onEdit={handleEditDeal}
+                            />
+                          ))
                         )}
                         {provided.placeholder}
                       </div>
@@ -194,13 +193,13 @@ stageDeals.map((deal, index) => (
         </div>
       </DragDropContext>
 
-<DealEditModal
+      <DealEditModal
         isOpen={showEditModal}
         onClose={handleCloseEditModal}
         deal={editingDeal}
         onSave={handleSaveDeal}
       />
-    </div>
+</div>
   );
 };
 

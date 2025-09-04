@@ -1,17 +1,15 @@
 import { Route, Routes } from "react-router-dom";
 import { motion } from "framer-motion";
 import React, { Component } from "react";
-import "@/index.css";
 import Layout from "@/components/organisms/Layout";
 import Error from "@/components/ui/Error";
-import Analytics from "@/components/pages/Analytics";
-import Dashboard from "@/components/pages/Dashboard";
-import Leads from "@/components/pages/Leads";
-import Pipeline from "@/components/pages/Pipeline";
-import Hotlist from "@/components/pages/Hotlist";
-import Deals from "@/components/pages/Deals";
 import Leaderboard from "@/components/pages/Leaderboard";
 import Calendar from "@/components/pages/Calendar";
+import Analytics from "@/components/pages/Analytics";
+import Pipeline from "@/components/pages/Pipeline";
+import Dashboard from "@/components/pages/Dashboard";
+import Leads from "@/components/pages/Leads";
+import Hotlist from "@/components/pages/Hotlist";
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -135,7 +133,7 @@ class ErrorBoundary extends Component {
   }
 }
 
-function CRMApp() {
+function App() {
   return (
     <ErrorBoundary>
       <Layout>
@@ -148,11 +146,11 @@ function CRMApp() {
             >
               <Dashboard />
             </motion.div>
-} />
+          } />
           <Route path="/leads" element={
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
               <Leads />
@@ -166,16 +164,7 @@ function CRMApp() {
             >
               <Hotlist />
             </motion.div>
-          } />
-          <Route path="/deals" element={
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Deals />
-            </motion.div>
-          } />
+} />
           <Route path="/pipeline" element={
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -218,4 +207,4 @@ function CRMApp() {
   );
 }
 
-export default CRMApp;
+export default App;

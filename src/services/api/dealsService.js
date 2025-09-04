@@ -56,11 +56,7 @@ export const updateDeal = async (id, updates) => {
     throw new Error("Deal not found");
   }
   
-  deals[index] = { 
-    ...deals[index], 
-    ...updates,
-    updatedAt: new Date().toISOString()
-  };
+  deals[index] = { ...deals[index], ...updates };
   return { ...deals[index] };
 };
 
