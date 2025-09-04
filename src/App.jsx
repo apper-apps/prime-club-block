@@ -1,15 +1,17 @@
 import { Route, Routes } from "react-router-dom";
 import { motion } from "framer-motion";
 import React, { Component } from "react";
+import "@/index.css";
 import Layout from "@/components/organisms/Layout";
 import Error from "@/components/ui/Error";
-import Leaderboard from "@/components/pages/Leaderboard";
-import Calendar from "@/components/pages/Calendar";
 import Analytics from "@/components/pages/Analytics";
-import Pipeline from "@/components/pages/Pipeline";
 import Dashboard from "@/components/pages/Dashboard";
 import Leads from "@/components/pages/Leads";
+import Pipeline from "@/components/pages/Pipeline";
 import Hotlist from "@/components/pages/Hotlist";
+import Deals from "@/components/pages/Deals";
+import Leaderboard from "@/components/pages/Leaderboard";
+import Calendar from "@/components/pages/Calendar";
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -133,7 +135,7 @@ class ErrorBoundary extends Component {
   }
 }
 
-function App() {
+function CRMApp() {
   return (
     <ErrorBoundary>
       <Layout>
@@ -148,23 +150,32 @@ function App() {
             </motion.div>
           } />
           <Route path="/leads" element={
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
+initial={{ opacity: 0, y: 20 }}
 animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Leads />
-            </motion.div>
-          } />
-          <Route path="/hotlist" element={
+transition={{ duration: 0.3 }}
+>
+<Leads />
+</motion.div>
+} />
+<Route path="/hotlist" element={
+<motion.div
+initial={{ opacity: 0, y: 20 }}
+animate={{ opacity: 1, y: 0 }}
+transition={{ duration: 0.3 }}
+>
+<Hotlist />
+</motion.div>
+} />
+<Route path="/deals" element={
+<motion.div
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <Hotlist />
+              <Deals />
             </motion.div>
-} />
+          } />
           <Route path="/pipeline" element={
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -207,4 +218,4 @@ animate={{ opacity: 1, y: 0 }}
   );
 }
 
-export default App;
+export default CRMApp;
