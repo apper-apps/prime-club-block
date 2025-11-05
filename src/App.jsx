@@ -1,15 +1,9 @@
-import { Route, Routes } from "react-router-dom";
-import { motion } from "framer-motion";
 import React, { Component } from "react";
-import Layout from "@/components/organisms/Layout";
+import { RouterProvider } from "react-router-dom";
+import { router } from "@/router";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Error from "@/components/ui/Error";
-import Leaderboard from "@/components/pages/Leaderboard";
-import Calendar from "@/components/pages/Calendar";
-import Analytics from "@/components/pages/Analytics";
-import Pipeline from "@/components/pages/Pipeline";
-import Dashboard from "@/components/pages/Dashboard";
-import Leads from "@/components/pages/Leads";
-import Hotlist from "@/components/pages/Hotlist";
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -136,73 +130,20 @@ class ErrorBoundary extends Component {
 function App() {
   return (
     <ErrorBoundary>
-      <Layout>
-        <Routes>
-          <Route path="/" element={
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Dashboard />
-            </motion.div>
-          } />
-          <Route path="/leads" element={
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Leads />
-            </motion.div>
-          } />
-          <Route path="/hotlist" element={
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Hotlist />
-            </motion.div>
-} />
-          <Route path="/pipeline" element={
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Pipeline />
-            </motion.div>
-          } />
-          <Route path="/analytics" element={
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Analytics />
-            </motion.div>
-          } />
-          <Route path="/calendar" element={
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Calendar />
-            </motion.div>
-          } />
-          <Route path="/leaderboard" element={
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Leaderboard />
-            </motion.div>
-          } />
-        </Routes>
-      </Layout>
+      <RouterProvider router={router} />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+        className="z-50"
+      />
     </ErrorBoundary>
   );
 }
