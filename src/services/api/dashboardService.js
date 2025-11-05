@@ -131,11 +131,6 @@ const validateUserId = (userId) => {
 // Removed duplicate safeServiceCall function declaration
 
 // Helper function to validate user ID
-const validateUserId = (userId) => {
-  if (!userId) return null;
-  const id = parseInt(userId);
-  return isNaN(id) ? null : id;
-};
 
 // Helper function to get date ranges
 const getDateRange = (period) => {
