@@ -98,13 +98,13 @@ const handleStatusChange = async (leadId, newStatus) => {
       );
       
       // Define status-to-stage mapping for common statuses
-      const statusToStageMap = {
+const statusToStageMap = {
         "Connected": "Connected",
         "Locked": "Locked", 
         "Meeting Booked": "Meeting Booked",
         "Meeting Done": "Meeting Done",
         "Negotiation": "Negotiation",
-        "Closed Lost": "Lost"
+        "Closed Lost": "Closed Lost"
       };
       
       // Check if status maps to a pipeline stage
