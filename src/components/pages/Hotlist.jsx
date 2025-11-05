@@ -91,13 +91,12 @@ const existingDeal = currentDeals.find(deal => deal.leadId === leadId.toString()
           const dealData = {
             name: `${updatedLead.websiteUrl.replace('https://', '').replace('www.', '')} - ${updatedLead.category}`,
             leadName: updatedLead.websiteUrl.replace('https://', '').replace('www.', ''),
-            leadId: updatedLead.Id,
-value: parseFloat(updatedLead.arr) || 0,
+leadId: leadId.toString(),
+            value: parseFloat(updatedLead.arr) || 0,
             stage: targetStage,
-            leadId: leadId.toString(),
             assignedRep: 'Unassigned',
-            startMonth: new Date().toISOString().split('T')[0],
-            endMonth: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            startMonth: new Date().getMonth() + 1,
+            endMonth: new Date().getMonth() + 3,
             edition: updatedLead.edition || 'Select Edition'
           };
           

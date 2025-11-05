@@ -114,7 +114,7 @@ export const getDealById = async (id) => {
       leadId: deal.lead_id_c || "",
       value: deal.value_c || 0,
       stage: deal.stage_c || "",
-assignedRep: deal.assigned_rep_c?.Name || deal.assigned_rep_c || "",
+assignedRep: typeof deal.assigned_rep_c === 'object' ? deal.assigned_rep_c?.Name || "" : deal.assigned_rep_c || "",
       startMonth: deal.start_month_c || new Date().getMonth() + 1,
       endMonth: deal.end_month_c || new Date().getMonth() + 3,
       edition: deal.edition_c || "",
@@ -142,7 +142,7 @@ export const createDeal = async (dealData) => {
       lead_name_c: dealData.leadName || "",
 lead_id_c: dealData.leadId ? dealData.leadId.toString() : "",
       value_c: dealData.value || 0,
-      stage_c: dealData.stage || "",
+stage_c: dealData.stage || "",
       assigned_rep_c: dealData.assignedRep || "",
       start_month_c: dealData.startMonth || new Date().getMonth() + 1,
       end_month_c: dealData.endMonth || new Date().getMonth() + 3,
@@ -150,7 +150,7 @@ lead_id_c: dealData.leadId ? dealData.leadId.toString() : "",
     };
 
     // Only include non-empty fields
-    const filteredData = Object.fromEntries(
+const filteredData = Object.fromEntries(
       Object.entries(recordData).filter(([key, value]) => value !== "" && value !== null && value !== undefined)
     );
 
@@ -213,7 +213,7 @@ export const updateDeal = async (id, updates) => {
     if (updates.name !== undefined) updateData.name_c = updates.name;
     if (updates.leadName !== undefined) updateData.lead_name_c = updates.leadName;
 if (updates.leadId !== undefined) updateData.lead_id_c = updates.leadId ? updates.leadId.toString() : "";
-    if (updates.value !== undefined) updateData.value_c = updates.value;
+    if (updates.value !== undefined) updateData.value_c = parseFloat(updates.value) || 0;
     if (updates.stage !== undefined) updateData.stage_c = updates.stage;
     if (updates.assignedRep !== undefined) updateData.assigned_rep_c = updates.assignedRep;
     if (updates.startMonth !== undefined) updateData.start_month_c = updates.startMonth;
@@ -221,7 +221,7 @@ if (updates.leadId !== undefined) updateData.lead_id_c = updates.leadId ? update
     if (updates.edition !== undefined) updateData.edition_c = updates.edition;
 
     // Only include non-empty fields
-    const filteredUpdates = Object.fromEntries(
+const filteredUpdates = Object.fromEntries(
       Object.entries(updateData).filter(([key, value]) => value !== "" && value !== null && value !== undefined)
     );
 

@@ -11,11 +11,6 @@ import Error from "@/components/ui/Error";
 import Loading from "@/components/ui/Loading";
 import DealCard from "@/components/molecules/DealCard";
 import DealEditModal from "@/components/molecules/DealEditModal";
-import salesRepsData from "@/services/mockData/salesReps.json";
-import dashboardData from "@/services/mockData/dashboard.json";
-import dealsData from "@/services/mockData/deals.json";
-import leadsData from "@/services/mockData/leads.json";
-import contactsData from "@/services/mockData/contacts.json";
 import { getDeals, updateDeal } from "@/services/api/dealsService";
 
 const Pipeline = () => {
