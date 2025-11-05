@@ -1,252 +1,413 @@
-import leadsData from "@/services/mockData/leads.json";
-import salesRepData from "@/services/mockData/salesReps.json";
+import { getApperClient } from "@/services/apperClient";
 
-let leads = [...leadsData];
-let salesReps = [...salesRepData];
-
-// Track all URLs that have ever been added to the system (for fresh lead detection)
-const leadHistoryTracker = new Map();
-
-// Initialize history tracker with existing leads
-leads.forEach(lead => {
-  const normalizedUrl = lead.websiteUrl.toLowerCase().replace(/\/$/, '');
-  leadHistoryTracker.set(normalizedUrl, true);
-});
-
-// Utility function to remove duplicate website URLs, keeping the most recent entry
-const deduplicateLeads = (leadsArray) => {
-  const urlMap = new Map();
-  const duplicates = [];
-  
-  // Sort by creation date (most recent first) to keep the latest entry
-  const sortedLeads = [...leadsArray].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  
-  sortedLeads.forEach(lead => {
-    const normalizedUrl = lead.websiteUrl.toLowerCase().replace(/\/$/, ''); // Remove trailing slash and normalize
-    
-    // Update history tracker
-    leadHistoryTracker.set(normalizedUrl, true);
-    
-    if (urlMap.has(normalizedUrl)) {
-      duplicates.push(lead);
-    } else {
-      urlMap.set(normalizedUrl, lead);
-    }
-  });
-return {
-    uniqueLeads: Array.from(urlMap.values()),
-    duplicatesRemoved: duplicates,
-    duplicateCount: duplicates.length
-  };
-};
+// Helper function to simulate API delay
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const getLeads = async () => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 400));
+  await delay(400);
   
-  // Automatically deduplicate leads
-  const deduplicationResult = deduplicateLeads(leads);
-  
-  // Update the leads array if duplicates were found
-  if (deduplicationResult.duplicateCount > 0) {
-    leads = deduplicationResult.uniqueLeads;
+  try {
+    const apperClient = getApperClient();
+    if (!apperClient) {
+      throw new Error('ApperClient not available');
+    }
+
+    const response = await apperClient.fetchRecords('lead_c', {
+      fields: [
+        {"field": {"Name": "Name"}},
+        {"field": {"Name": "product_name_c"}},
+        {"field": {"Name": "name_c"}},
+        {"field": {"Name": "website_url_c"}},
+        {"field": {"Name": "team_size_c"}},
+        {"field": {"Name": "arr_c"}},
+        {"field": {"Name": "category_c"}},
+        {"field": {"Name": "linkedin_url_c"}},
+        {"field": {"Name": "status_c"}},
+        {"field": {"Name": "funding_type_c"}},
+        {"field": {"Name": "edition_c"}},
+        {"field": {"Name": "follow_up_date_c"}},
+        {"field": {"Name": "added_by_name_c"}},
+        {"field": {"Name": "added_by_c"}},
+        {"field": {"Name": "CreatedOn"}}
+      ],
+      orderBy: [{"fieldName": "CreatedOn", "sorttype": "DESC"}]
+    });
+
+    if (!response.success) {
+      console.error(response.message);
+      throw new Error(response.message);
+    }
+
+    // Transform data to match existing field names for UI compatibility
+    const transformedData = response.data?.map(lead => ({
+      Id: lead.Id,
+      productName: lead.product_name_c || "",
+      name: lead.name_c || "",
+      websiteUrl: lead.website_url_c || "",
+      teamSize: lead.team_size_c || "1-3",
+      arr: lead.arr_c || 0,
+      category: lead.category_c || "",
+      linkedinUrl: lead.linkedin_url_c || "",
+      status: lead.status_c || "Keep an Eye",
+      fundingType: lead.funding_type_c || "Bootstrapped",
+      edition: lead.edition_c || "Select Edition",
+      followUpDate: lead.follow_up_date_c || null,
+      addedByName: lead.added_by_name_c || 'Unknown',
+      addedBy: lead.added_by_c?.Id || null,
+      createdAt: lead.CreatedOn || new Date().toISOString()
+    })) || [];
+
+    return { leads: transformedData };
+  } catch (error) {
+    console.error("Error fetching leads:", error);
+    throw error;
   }
-  
-  // Enhance leads with sales rep names
-  const leadsWithRepNames = leads.map(lead => {
-    const salesRep = salesReps.find(rep => rep.Id === lead.addedBy);
-    return {
-      ...lead,
-      addedByName: salesRep ? salesRep.name : 'Unknown'
-    };
-  });
-  
-  return {
-    leads: leadsWithRepNames,
-    deduplicationResult: deduplicationResult.duplicateCount > 0 ? deduplicationResult : null
-  };
 };
 
 export const getLeadById = async (id) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 200));
+  await delay(200);
   
-  const lead = leads.find(l => l.Id === id);
-  if (!lead) {
-    throw new Error("Lead not found");
+  try {
+    const apperClient = getApperClient();
+    if (!apperClient) {
+      throw new Error('ApperClient not available');
+    }
+
+    const response = await apperClient.getRecordById('lead_c', id, {
+      fields: [
+        {"field": {"Name": "Name"}},
+        {"field": {"Name": "product_name_c"}},
+        {"field": {"Name": "name_c"}},
+        {"field": {"Name": "website_url_c"}},
+        {"field": {"Name": "team_size_c"}},
+        {"field": {"Name": "arr_c"}},
+        {"field": {"Name": "category_c"}},
+        {"field": {"Name": "linkedin_url_c"}},
+        {"field": {"Name": "status_c"}},
+        {"field": {"Name": "funding_type_c"}},
+        {"field": {"Name": "edition_c"}},
+        {"field": {"Name": "follow_up_date_c"}},
+        {"field": {"Name": "added_by_name_c"}},
+        {"field": {"Name": "added_by_c"}},
+        {"field": {"Name": "CreatedOn"}}
+      ]
+    });
+
+    if (!response.success) {
+      console.error(response.message);
+      throw new Error(response.message);
+    }
+
+    if (!response.data) {
+      throw new Error("Lead not found");
+    }
+
+    // Transform data to match existing field names
+    const lead = response.data;
+    return {
+      Id: lead.Id,
+      productName: lead.product_name_c || "",
+      name: lead.name_c || "",
+      websiteUrl: lead.website_url_c || "",
+      teamSize: lead.team_size_c || "1-3",
+      arr: lead.arr_c || 0,
+      category: lead.category_c || "",
+      linkedinUrl: lead.linkedin_url_c || "",
+      status: lead.status_c || "Keep an Eye",
+      fundingType: lead.funding_type_c || "Bootstrapped",
+      edition: lead.edition_c || "Select Edition",
+      followUpDate: lead.follow_up_date_c || null,
+      addedByName: lead.added_by_name_c || 'Unknown',
+      addedBy: lead.added_by_c?.Id || null,
+      createdAt: lead.CreatedOn || new Date().toISOString()
+    };
+  } catch (error) {
+    console.error("Error fetching lead:", error);
+    throw error;
   }
-  
-  return { ...lead };
 };
 
 export const createLead = async (leadData) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 300));
+  await delay(300);
   
-  // Validate required fields
-  if (!leadData.websiteUrl || !leadData.websiteUrl.trim()) {
-    throw new Error("Website URL is required");
+  try {
+    const apperClient = getApperClient();
+    if (!apperClient) {
+      throw new Error('ApperClient not available');
+    }
+
+    // Validate required fields
+    if (!leadData.websiteUrl || !leadData.websiteUrl.trim()) {
+      throw new Error("Website URL is required");
+    }
+
+    // Transform data to database field names, only including updateable fields
+    const recordData = {
+      product_name_c: leadData.productName || "",
+      name_c: leadData.name || "",
+      website_url_c: leadData.websiteUrl,
+      team_size_c: leadData.teamSize || "1-3",
+      arr_c: leadData.arr || 0,
+      category_c: leadData.category || "Other",
+      linkedin_url_c: leadData.linkedinUrl || "",
+      status_c: leadData.status || "Keep an Eye",
+      funding_type_c: leadData.fundingType || "Bootstrapped",
+      edition_c: leadData.edition || "Select Edition",
+      follow_up_date_c: leadData.followUpDate || null,
+      added_by_name_c: leadData.addedByName || 'Unknown'
+    };
+
+    // Only include non-empty fields
+    const filteredData = Object.fromEntries(
+      Object.entries(recordData).filter(([key, value]) => value !== "" && value !== null && value !== undefined)
+    );
+
+    const response = await apperClient.createRecord('lead_c', {
+      records: [filteredData]
+    });
+
+    if (!response.success) {
+      console.error(response.message);
+      throw new Error(response.message);
+    }
+
+    if (response.results) {
+      const successful = response.results.filter(r => r.success);
+      const failed = response.results.filter(r => !r.success);
+      
+      if (failed.length > 0) {
+        console.error(`Failed to create ${failed.length} leads:`, failed);
+        failed.forEach(record => {
+          if (record.message) throw new Error(record.message);
+        });
+      }
+      
+      if (successful.length > 0) {
+        const createdLead = successful[0].data;
+        // Transform back to UI format
+        return {
+          Id: createdLead.Id,
+          productName: createdLead.product_name_c || "",
+          name: createdLead.name_c || "",
+          websiteUrl: createdLead.website_url_c || "",
+          teamSize: createdLead.team_size_c || "1-3",
+          arr: createdLead.arr_c || 0,
+          category: createdLead.category_c || "",
+          linkedinUrl: createdLead.linkedin_url_c || "",
+          status: createdLead.status_c || "Keep an Eye",
+          fundingType: createdLead.funding_type_c || "Bootstrapped",
+          edition: createdLead.edition_c || "Select Edition",
+          followUpDate: createdLead.follow_up_date_c || null,
+          addedByName: createdLead.added_by_name_c || 'Unknown',
+          addedBy: createdLead.added_by_c?.Id || null,
+          createdAt: createdLead.CreatedOn || new Date().toISOString()
+        };
+      }
+    }
+  } catch (error) {
+    console.error("Error creating lead:", error);
+    throw error;
   }
-  
-  // Check for duplicate website URL before creating
-  const normalizedUrl = leadData.websiteUrl.toLowerCase().replace(/\/$/, '');
-  const existingLead = leads.find(lead => 
-    lead.websiteUrl.toLowerCase().replace(/\/$/, '') === normalizedUrl
-  );
-  
-  if (existingLead) {
-    throw new Error(`A lead with website URL "${leadData.websiteUrl}" already exists`);
-  }
-// Update history tracker for new lead
-  leadHistoryTracker.set(normalizedUrl, true);
-  const maxId = Math.max(...leads.map(l => l.Id), 0);
-const newLead = {
-    productName: leadData.productName || "",
-    name: leadData.name || "",
-    websiteUrl: leadData.websiteUrl,
-teamSize: leadData.teamSize || "1-3",
-    arr: leadData.arr || 0,
-    category: leadData.category || "Other",
-    linkedinUrl: leadData.linkedinUrl || "",
-    status: leadData.status || "Keep an Eye",
-    fundingType: leadData.fundingType || "Bootstrapped",
-    edition: leadData.edition || "Select Edition",
-    followUpDate: leadData.followUpDate || null,
-    addedBy: leadData.addedBy || 1, // Default to first sales rep for demo
-    Id: maxId + 1,
-    createdAt: new Date().toISOString()
-  };
-  
-  leads.push(newLead);
-  
-  // Return lead with sales rep name
-  const salesRep = salesReps.find(rep => rep.Id === newLead.addedBy);
-  return { 
-    ...newLead,
-    addedByName: salesRep ? salesRep.name : 'Unknown'
-  };
 };
 
 export const updateLead = async (id, updates) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 300));
+  await delay(300);
   
-  const index = leads.findIndex(l => l.Id === id);
-  if (index === -1) {
-    throw new Error("Lead not found");
+  try {
+    const apperClient = getApperClient();
+    if (!apperClient) {
+      throw new Error('ApperClient not available');
+    }
+
+    // Transform updates to database field names, only updateable fields
+    const updateData = {};
+    if (updates.productName !== undefined) updateData.product_name_c = updates.productName;
+    if (updates.name !== undefined) updateData.name_c = updates.name;
+    if (updates.websiteUrl !== undefined) updateData.website_url_c = updates.websiteUrl;
+    if (updates.teamSize !== undefined) updateData.team_size_c = updates.teamSize;
+    if (updates.arr !== undefined) updateData.arr_c = updates.arr;
+    if (updates.category !== undefined) updateData.category_c = updates.category;
+    if (updates.linkedinUrl !== undefined) updateData.linkedin_url_c = updates.linkedinUrl;
+    if (updates.status !== undefined) updateData.status_c = updates.status;
+    if (updates.fundingType !== undefined) updateData.funding_type_c = updates.fundingType;
+    if (updates.edition !== undefined) updateData.edition_c = updates.edition;
+    if (updates.followUpDate !== undefined) updateData.follow_up_date_c = updates.followUpDate;
+    if (updates.addedByName !== undefined) updateData.added_by_name_c = updates.addedByName;
+
+    // Only include non-empty fields
+    const filteredUpdates = Object.fromEntries(
+      Object.entries(updateData).filter(([key, value]) => value !== "" && value !== null && value !== undefined)
+    );
+
+    const response = await apperClient.updateRecord('lead_c', {
+      records: [{
+        Id: parseInt(id),
+        ...filteredUpdates
+      }]
+    });
+
+    if (!response.success) {
+      console.error(response.message);
+      throw new Error(response.message);
+    }
+
+    if (response.results) {
+      const successful = response.results.filter(r => r.success);
+      const failed = response.results.filter(r => !r.success);
+      
+      if (failed.length > 0) {
+        console.error(`Failed to update ${failed.length} leads:`, failed);
+        failed.forEach(record => {
+          if (record.message) throw new Error(record.message);
+        });
+      }
+      
+      if (successful.length > 0) {
+        const updatedLead = successful[0].data;
+        // Transform back to UI format
+        return {
+          Id: updatedLead.Id,
+          productName: updatedLead.product_name_c || "",
+          name: updatedLead.name_c || "",
+          websiteUrl: updatedLead.website_url_c || "",
+          teamSize: updatedLead.team_size_c || "1-3",
+          arr: updatedLead.arr_c || 0,
+          category: updatedLead.category_c || "",
+          linkedinUrl: updatedLead.linkedin_url_c || "",
+          status: updatedLead.status_c || "Keep an Eye",
+          fundingType: updatedLead.funding_type_c || "Bootstrapped",
+          edition: updatedLead.edition_c || "Select Edition",
+          followUpDate: updatedLead.follow_up_date_c || null,
+          addedByName: updatedLead.added_by_name_c || 'Unknown',
+          addedBy: updatedLead.added_by_c?.Id || null,
+          createdAt: updatedLead.CreatedOn || new Date().toISOString()
+        };
+      }
+    }
+  } catch (error) {
+    console.error("Error updating lead:", error);
+    throw error;
   }
-  
-  leads[index] = { ...leads[index], ...updates };
-  return { ...leads[index] };
 };
 
 export const deleteLead = async (id) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 300));
+  await delay(300);
   
-  const index = leads.findIndex(l => l.Id === id);
-  if (index === -1) {
-    throw new Error("Lead not found");
+  try {
+    const apperClient = getApperClient();
+    if (!apperClient) {
+      throw new Error('ApperClient not available');
+    }
+
+    const response = await apperClient.deleteRecord('lead_c', {
+      RecordIds: [parseInt(id)]
+    });
+
+    if (!response.success) {
+      console.error(response.message);
+      throw new Error(response.message);
+    }
+
+    if (response.results) {
+      const failed = response.results.filter(r => !r.success);
+      
+      if (failed.length > 0) {
+        console.error(`Failed to delete ${failed.length} leads:`, failed);
+        failed.forEach(record => {
+          if (record.message) throw new Error(record.message);
+        });
+      }
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting lead:", error);
+    throw error;
   }
-  
-  leads.splice(index, 1);
-  return { success: true };
 };
 
 export const getDailyLeadsReport = async () => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 300));
+  await delay(300);
   
-  // Get today's date in YYYY-MM-DD format
-  const today = new Date().toISOString().split('T')[0];
-  
-  // Filter leads created today
-  const todaysLeads = leads.filter(lead => {
-    const leadDate = lead.createdAt.split('T')[0];
-    return leadDate === today;
-  });
-  
-  // Group by sales rep
-  const reportData = {};
-  
-  // Initialize all sales reps with empty data
-  salesReps.forEach(rep => {
-    reportData[rep.name] = {
-      salesRep: rep.name,
-      salesRepId: rep.Id,
-      leads: [],
-      leadCount: 0,
-      lowPerformance: false
-    };
-  });
-  
-  // Add today's leads to the respective sales reps
-  todaysLeads.forEach(lead => {
-    const salesRep = salesReps.find(rep => rep.Id === lead.addedBy);
-    const repName = salesRep ? salesRep.name : 'Unknown';
+  try {
+    const { leads } = await getLeads();
     
-    if (reportData[repName]) {
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Filter leads created today
+    const todaysLeads = leads.filter(lead => {
+      const leadDate = lead.createdAt.split('T')[0];
+      return leadDate === today;
+    });
+    
+    // Group by sales rep
+    const reportData = {};
+    
+    // Group today's leads by sales rep
+    todaysLeads.forEach(lead => {
+      const repName = lead.addedByName || 'Unknown';
+      
+      if (!reportData[repName]) {
+        reportData[repName] = {
+          salesRep: repName,
+          salesRepId: lead.addedBy,
+          leads: [],
+          leadCount: 0,
+          lowPerformance: false
+        };
+      }
+      
       reportData[repName].leads.push(lead);
-    }
-  });
-  
-  // Calculate lead counts and identify low performers
-  Object.values(reportData).forEach(repData => {
-    repData.leadCount = repData.leads.length;
-    repData.lowPerformance = repData.leadCount < 5;
-  });
-  
-  // Convert to array and sort by lead count (descending)
-return Object.values(reportData).sort((a, b) => b.leads.length - a.leads.length);
+    });
+    
+    // Calculate lead counts and identify low performers
+    Object.values(reportData).forEach(repData => {
+      repData.leadCount = repData.leads.length;
+      repData.lowPerformance = repData.leadCount < 5;
+    });
+    
+    return Object.values(reportData).sort((a, b) => b.leads.length - a.leads.length);
+  } catch (error) {
+    console.error("Error getting daily leads report:", error);
+    throw error;
+  }
 };
 
 export const getPendingFollowUps = async () => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 300));
+  await delay(300);
   
-  // Get current date and 7 days from now
-  const now = new Date();
-  const sevenDaysFromNow = new Date();
-  sevenDaysFromNow.setDate(now.getDate() + 7);
-  
-  // Filter leads with follow-up dates within the next 7 days
-  const pendingFollowUps = leads.filter(lead => {
-    if (!lead.followUpDate) return false;
+  try {
+    const { leads } = await getLeads();
     
-    const followUpDate = new Date(lead.followUpDate);
-    return followUpDate >= now && followUpDate <= sevenDaysFromNow;
-  });
-// Sort by follow-up date (earliest first)
-  return pendingFollowUps.sort((a, b) => new Date(a.followUpDate) - new Date(b.followUpDate));
+    // Get current date and 7 days from now
+    const now = new Date();
+    const sevenDaysFromNow = new Date();
+    sevenDaysFromNow.setDate(now.getDate() + 7);
+    
+    // Filter leads with follow-up dates within the next 7 days
+    const pendingFollowUps = leads.filter(lead => {
+      if (!lead.followUpDate) return false;
+      
+      const followUpDate = new Date(lead.followUpDate);
+      return followUpDate >= now && followUpDate <= sevenDaysFromNow;
+    });
+    
+    // Sort by follow-up date (earliest first)
+    return pendingFollowUps.sort((a, b) => new Date(a.followUpDate) - new Date(b.followUpDate));
+  } catch (error) {
+    console.error("Error getting pending follow-ups:", error);
+    throw error;
+  }
 };
 
-// Get only fresh leads that have never existed in the system before
 export const getFreshLeadsOnly = async (leadsArray) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 100));
+  await delay(100);
   
-  const freshLeads = leadsArray.filter(lead => {
-    const normalizedUrl = lead.websiteUrl.toLowerCase().replace(/\/$/, '');
-    // Check if this URL was added today and wasn't in the system before today
+  // For now, return all leads from today as fresh
+  const today = new Date();
+  return leadsArray.filter(lead => {
     const leadDate = new Date(lead.createdAt);
-    const today = new Date();
-    
-    // If lead was created today and URL never existed before, it's fresh
-    return leadDate.toDateString() === today.toDateString() && 
-           !wasUrlPreviouslyAdded(normalizedUrl, leadDate);
+    return leadDate.toDateString() === today.toDateString();
   });
-  
-  return freshLeads;
-};
-
-// Helper function to check if URL existed before a given date
-const wasUrlPreviouslyAdded = (normalizedUrl, currentDate) => {
-  // Check if any existing lead with this URL was created before the current date
-  const existingLeads = leads.filter(lead => {
-    const existingNormalizedUrl = lead.websiteUrl.toLowerCase().replace(/\/$/, '');
-    return existingNormalizedUrl === normalizedUrl && 
-           new Date(lead.createdAt) < currentDate;
-  });
-  
-  return existingLeads.length > 0;
 };

@@ -150,8 +150,7 @@ const UserSettings = ({ isCollapsed }) => {
 const settingsItems = [
     { icon: "User", label: "Profile", action: () => console.log("Profile") },
     { icon: "Settings", label: "Account Settings", action: () => console.log("Account Settings") },
-    { icon: "Palette", label: "Preferences", action: () => console.log("Preferences") },
-    { icon: "LogOut", label: "Logout", action: () => console.log("Logout") }
+    { icon: "Palette", label: "Preferences", action: () => console.log("Preferences") }
   ];
 
 return (

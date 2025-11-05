@@ -1,8 +1,8 @@
+import 'react-toastify/dist/ReactToastify.css';
 import React, { Component } from "react";
 import { RouterProvider } from "react-router-dom";
 import { router } from "@/router";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from "react-toastify";
 import Error from "@/components/ui/Error";
 
 class ErrorBoundary extends Component {
@@ -126,7 +126,6 @@ class ErrorBoundary extends Component {
     return this.props.children;
   }
 }
-
 function App() {
   return (
     <ErrorBoundary>

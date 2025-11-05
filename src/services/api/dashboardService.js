@@ -1,13 +1,62 @@
-import salesRepsData from "@/services/mockData/salesReps.json";
-import dashboardData from "@/services/mockData/dashboard.json";
 import React from "react";
 import { getLeads, getPendingFollowUps } from "@/services/api/leadsService";
 import { getWebsiteUrlActivity } from "@/services/api/reportService";
 import { getContacts } from "@/services/api/contactsService";
 import { getDeals } from "@/services/api/dealsService";
 import { getLeadsAnalytics, getUserPerformance } from "@/services/api/analyticsService";
+import { getSalesReps } from "@/services/api/salesRepService";
 import Error from "@/components/ui/Error";
 
+// Fallback dashboard data for when services are unavailable
+const fallbackDashboardData = {
+  metrics: [
+    {
+      id: 1,
+      title: "Total Leads Contacted",
+      value: "0",
+      icon: "Users",
+      trend: "neutral",
+      trendValue: "0%",
+      color: "primary"
+    },
+    {
+      id: 2,
+      title: "Meetings Booked",
+      value: "0",
+      icon: "Calendar",
+      trend: "neutral",
+      trendValue: "0%",
+      color: "success"
+    },
+    {
+      id: 3,
+      title: "Deals Closed",
+      value: "0",
+      icon: "TrendingUp", 
+      trend: "neutral",
+      trendValue: "0%",
+      color: "warning"
+    },
+    {
+      id: 4,
+      title: "Conversion Rate",
+      value: "0.0%",
+      icon: "Target",
+      trend: "neutral",
+      trendValue: "0%",
+      color: "info"
+    }
+  ],
+  recentActivity: [
+    {
+      id: 1,
+      title: "System initialized",
+      type: "general",
+      time: "Just now"
+    }
+  ],
+  todaysMeetings: []
+};
 // Dashboard Service - Centralized data management for dashboard components
 
 // Standardized API delay for consistent UX
@@ -78,30 +127,86 @@ const validateUserId = (userId) => {
 };
 
 // Core dashboard metrics from static data
+// Simulate API delay
+const simulateAPICall = (duration = 300) => new Promise(resolve => setTimeout(resolve, duration));
+
+// Helper function for safe service calls
+const safeServiceCall = async (serviceCall, fallback) => {
+  try {
+    return await serviceCall();
+  } catch (error) {
+    console.error('Service call failed:', error);
+    return fallback;
+  }
+};
+
+// Helper function to validate user ID
+const validateUserId = (userId) => {
+  if (!userId) return null;
+  const id = parseInt(userId);
+  return isNaN(id) ? null : id;
+};
+
+// Helper function to get date ranges
+const getDateRange = (period) => {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  
+  switch (period) {
+    case 'today':
+      return {
+        start: today,
+        end: new Date(today.getTime() + 24 * 60 * 60 * 1000)
+      };
+    case 'yesterday':
+      const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+      return {
+        start: yesterday,
+        end: today
+      };
+    case 'week':
+      const weekStart = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      return {
+        start: weekStart,
+        end: new Date(today.getTime() + 24 * 60 * 60 * 1000)
+      };
+    case 'month':
+      const monthStart = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+      return {
+        start: monthStart,
+        end: new Date(today.getTime() + 24 * 60 * 60 * 1000)
+      };
+    default:
+      return {
+        start: new Date(0),
+        end: new Date()
+      };
+  }
+};
+
 export const getDashboardMetrics = async () => {
   await simulateAPICall();
   
   try {
     // Fetch real data from services
-const [leadsResponse, dealsResponse, contactsResponse] = await Promise.all([
+    const [leadsResponse, dealsResponse, contactsResponse] = await Promise.all([
       safeServiceCall(() => getLeads(), { leads: [] }),
-      safeServiceCall(() => getDeals(), { deals: [] }),
-      safeServiceCall(() => getContacts(), { contacts: [] })
+      safeServiceCall(() => getDeals(), []),
+      safeServiceCall(() => getContacts(), [])
     ]);
 
     // Extract arrays from service responses with proper fallbacks
     const leadsData = Array.isArray(leadsResponse) ? leadsResponse : (leadsResponse?.leads || []);
-    const dealsData = Array.isArray(dealsResponse) ? dealsResponse : (dealsResponse?.deals || []);
-    const contactsData = Array.isArray(contactsResponse) ? contactsResponse : (contactsResponse?.contacts || []);
+    const dealsData = Array.isArray(dealsResponse) ? dealsResponse : [];
+    const contactsData = Array.isArray(contactsResponse) ? contactsResponse : [];
 
-    // Calculate dynamic metrics
-// Calculate dynamic metrics with array safety checks
+    // Calculate dynamic metrics with array safety checks
     const totalLeadsContacted = Array.isArray(leadsData) ? leadsData.length : 0;
     const meetingsBooked = Array.isArray(leadsData) ? leadsData.filter(lead => 
       lead?.status === 'Meeting Booked' || lead?.status === 'Meeting Done'
     ).length : 0;
     const dealsClosedCount = Array.isArray(dealsData) ? dealsData.filter(deal =>
-      deal.status === 'Closed Won'
+      deal.stage === 'Closed Won'
     ).length : 0;
     const conversionRate = totalLeadsContacted > 0 
       ? ((dealsClosedCount / totalLeadsContacted) * 100).toFixed(1)
@@ -126,13 +231,13 @@ const [leadsResponse, dealsResponse, contactsResponse] = await Promise.all([
     const currentMonthDeals = Array.isArray(dealsData) ? dealsData.filter(deal => {
       if (!deal.updatedAt && !deal.createdAt) return false;
       const dealDate = new Date(deal.updatedAt || deal.createdAt);
-      return dealDate.getMonth() === currentMonth && deal.status === 'Closed Won';
+      return dealDate.getMonth() === currentMonth && deal.stage === 'Closed Won';
     }).length : 0;
     
     const previousMonthDeals = Array.isArray(dealsData) ? dealsData.filter(deal => {
       if (!deal.updatedAt && !deal.createdAt) return false;
       const dealDate = new Date(deal.updatedAt || deal.createdAt);
-      return dealDate.getMonth() === previousMonth && deal.status === 'Closed Won';
+      return dealDate.getMonth() === previousMonth && deal.stage === 'Closed Won';
     }).length : 0;
 
     // Generate realistic trend calculations based on actual data comparison
@@ -151,6 +256,7 @@ const [leadsResponse, dealsResponse, contactsResponse] = await Promise.all([
     const conversionTrend = parseFloat(conversionRate) > 5 ? 
       Math.round(parseFloat(conversionRate) * 2) : 
       Math.round(parseFloat(conversionRate));
+      
     return [
       {
         id: 1,
@@ -159,7 +265,7 @@ const [leadsResponse, dealsResponse, contactsResponse] = await Promise.all([
         icon: "Users",
         trend: totalLeadsContacted > 0 ? "up" : "neutral",
         trendValue: `${leadsTrend}%`,
-color: "primary"
+        color: "primary"
       },
       {
         id: 2,
@@ -193,11 +299,7 @@ color: "primary"
     console.error('Error calculating dashboard metrics:', error);
     
     // Fallback to static data if calculation fails
-    if (!dashboardData?.metrics || !Array.isArray(dashboardData.metrics)) {
-      throw new Error('Invalid dashboard metrics data structure');
-    }
-    
-    return dashboardData.metrics.map(metric => ({
+    return fallbackDashboardData.metrics.map(metric => ({
       ...metric,
       id: metric.id || Math.random(),
       value: metric.value || '0',
@@ -207,15 +309,11 @@ color: "primary"
   }
 };
 
-// Recent activity from static data
+// Recent activity from fallback data
 export const getRecentActivity = async () => {
   await simulateAPICall();
   
-  if (!dashboardData?.recentActivity || !Array.isArray(dashboardData.recentActivity)) {
-    throw new Error('Invalid recent activity data structure');
-  }
-  
-  return dashboardData.recentActivity.map(activity => ({
+  return fallbackDashboardData.recentActivity.map(activity => ({
     ...activity,
     id: activity.id || Math.random(),
     time: activity.time || 'Unknown time',
@@ -223,15 +321,11 @@ export const getRecentActivity = async () => {
   }));
 };
 
-// Today's meetings from static data
+// Today's meetings from fallback data
 export const getTodaysMeetings = async () => {
   await simulateAPICall();
   
-  if (!dashboardData?.todaysMeetings || !Array.isArray(dashboardData.todaysMeetings)) {
-    return [];
-  }
-  
-  return dashboardData.todaysMeetings.map(meeting => ({
+  return fallbackDashboardData.todaysMeetings.map(meeting => ({
     ...meeting,
     id: meeting.id || Math.random(),
     title: meeting.title || 'Untitled Meeting',
@@ -246,7 +340,6 @@ const getDashboardPendingFollowUps = async () => {
   
   const fallback = [];
   return safeServiceCall(async () => {
-    const { getPendingFollowUps } = await import("@/services/api/leadsService");
     const followUps = await getPendingFollowUps();
     
     if (!Array.isArray(followUps)) {
@@ -275,8 +368,7 @@ export const getLeadPerformanceChart = async () => {
     series: [{ name: 'Leads', data: [12, 19, 15, 27, 22, 31, 28] }]
   };
   
-return safeServiceCall(async () => {
-    const { getLeads } = await import("@/services/api/leadsService");
+  return safeServiceCall(async () => {
     const leadsResponse = await getLeads();
     
     // Extract leads array with proper fallback handling
@@ -326,7 +418,6 @@ export const getSalesFunnelAnalysis = async () => {
   };
   
   return safeServiceCall(async () => {
-    const { getLeadsAnalytics } = await import("@/services/api/analyticsService");
     const analyticsData = await getLeadsAnalytics('all', 'all');
     
     if (!analyticsData?.leads || !Array.isArray(analyticsData.leads)) {
@@ -367,20 +458,20 @@ export const getSalesFunnelAnalysis = async () => {
 export const getTeamPerformanceRankings = async () => {
   await simulateAPICall();
   
-  const fallback = salesRepsData.map(rep => ({
-    Id: rep.Id,
-    name: rep.name,
-    totalLeads: Math.floor(Math.random() * 100) + 10,
-    weekLeads: Math.floor(Math.random() * 20) + 1,
-    todayLeads: Math.floor(Math.random() * 5)
-  }));
+  const fallback = [];
   
   return safeServiceCall(async () => {
-    const { getUserPerformance } = await import("@/services/api/analyticsService");
+    const salesRepsData = await getSalesReps();
     const performanceData = await getUserPerformance();
     
     if (!Array.isArray(performanceData)) {
-      return fallback;
+      return salesRepsData.map(rep => ({
+        Id: rep.Id,
+        name: rep.name,
+        totalLeads: Math.floor(Math.random() * 100) + 10,
+        weekLeads: Math.floor(Math.random() * 20) + 1,
+        todayLeads: Math.floor(Math.random() * 5)
+      }));
     }
     
     return performanceData
@@ -405,14 +496,13 @@ export const getRevenueTrendsData = async (year = new Date().getFullYear()) => {
   };
   
   return safeServiceCall(async () => {
-    const { getWebsiteUrlActivity } = await import("@/services/api/reportService");
     const urlActivity = await getWebsiteUrlActivity();
     
     if (!urlActivity?.data || !Array.isArray(urlActivity.data)) {
       return fallback;
     }
     
-const leads = urlActivity.data;
+    const leads = urlActivity.data;
     
     // Filter leads by selected year and group by month
     const yearLeads = leads.filter(lead => {
@@ -434,7 +524,7 @@ const leads = urlActivity.data;
       return acc;
     }, {});
     
-// Generate all months for the selected year
+    // Generate all months for the selected year
     const allMonths = Array.from({ length: 12 }, (_, i) => {
       const month = String(i + 1).padStart(2, '0');
       return `${year}-${month}`;
@@ -445,7 +535,7 @@ const leads = urlActivity.data;
       return monthlyData[month] ? monthlyData[month].revenue : 0;
     });
     
-return {
+    return {
       categories: allMonths.map(month => {
         const date = new Date(month);
         return date.toLocaleDateString('en-US', { month: 'short' });
@@ -459,10 +549,9 @@ return {
 export const getDetailedRecentActivity = async () => {
   await simulateAPICall();
   
-  const fallback = dashboardData.recentActivity || [];
+  const fallback = fallbackDashboardData.recentActivity || [];
   
   return safeServiceCall(async () => {
-    const { getWebsiteUrlActivity } = await import("@/services/api/reportService");
     const urlActivity = await getWebsiteUrlActivity();
     
     if (!urlActivity?.data || !Array.isArray(urlActivity.data)) {
@@ -496,7 +585,6 @@ export const getDetailedRecentActivity = async () => {
   }, fallback);
 };
 
-// User leads report with period filtering
 // User leads report with period filtering - ensures latest field updates
 export const getUserLeadsReport = async (userId, period = 'today') => {
   await simulateAPICall();
@@ -510,7 +598,6 @@ export const getUserLeadsReport = async (userId, period = 'today') => {
   const fallback = [];
   
   return safeServiceCall(async () => {
-const { getLeads } = await import("@/services/api/leadsService");
     const leadsResponse = await getLeads();
     
     // Extract leads array with consistent pattern
@@ -555,7 +642,7 @@ const { getLeads } = await import("@/services/api/leadsService");
         edition: lead.edition || 'Select Edition',
         followUpDate: lead.followUpDate || null,
         addedByName: lead.addedByName || 'Unknown'
-}))
+      }))
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }, fallback);
 };
