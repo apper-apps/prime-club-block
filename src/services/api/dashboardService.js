@@ -127,8 +127,6 @@ const validateUserId = (userId) => {
 };
 
 // Core dashboard metrics from static data
-// Simulate API delay
-const simulateAPICall = (duration = 300) => new Promise(resolve => setTimeout(resolve, duration));
 
 // Helper function for safe service calls
 const safeServiceCall = async (serviceCall, fallback) => {
