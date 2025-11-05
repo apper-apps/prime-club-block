@@ -1,10 +1,12 @@
-import { getLeadsAnalytics, getUserPerformance } from "@/services/api/analyticsService";
-import { getLeads, getPendingFollowUps } from "@/services/api/leadsService";
-import { getWebsiteUrlActivity } from "@/services/api/reportService";
-import { getDeals } from "@/services/api/dealsService";
-import { getContacts } from "@/services/api/contactsService";
 import salesRepsData from "@/services/mockData/salesReps.json";
 import dashboardData from "@/services/mockData/dashboard.json";
+import React from "react";
+import { getLeads, getPendingFollowUps } from "@/services/api/leadsService";
+import { getWebsiteUrlActivity } from "@/services/api/reportService";
+import { getContacts } from "@/services/api/contactsService";
+import { getDeals } from "@/services/api/dealsService";
+import { getLeadsAnalytics, getUserPerformance } from "@/services/api/analyticsService";
+import Error from "@/components/ui/Error";
 // Dashboard Service - Centralized data management for dashboard components
 
 // Standardized API delay for consistent UX
@@ -80,31 +82,37 @@ export const getDashboardMetrics = async () => {
   
   try {
     // Fetch real data from services
-    const [leadsData, dealsData, contactsData] = await Promise.all([
-      safeServiceCall(() => getLeads(), []),
-      safeServiceCall(() => getDeals(), []),
-      safeServiceCall(() => getContacts(), [])
+const [leadsResponse, dealsResponse, contactsResponse] = await Promise.all([
+      safeServiceCall(() => getLeads(), { leads: [] }),
+      safeServiceCall(() => getDeals(), { deals: [] }),
+      safeServiceCall(() => getContacts(), { contacts: [] })
     ]);
 
+    // Extract arrays from service responses with proper fallbacks
+    const leadsData = Array.isArray(leadsResponse) ? leadsResponse : (leadsResponse?.leads || []);
+    const dealsData = Array.isArray(dealsResponse) ? dealsResponse : (dealsResponse?.deals || []);
+    const contactsData = Array.isArray(contactsResponse) ? contactsResponse : (contactsResponse?.contacts || []);
+
     // Calculate dynamic metrics
-    const totalLeadsContacted = leadsData.length;
-    const meetingsBooked = leadsData.filter(lead => 
-      lead.status === 'Meeting Booked' || lead.status === 'Meeting Done'
-    ).length;
-    const dealsClosedCount = dealsData.filter(deal => 
+// Calculate dynamic metrics with array safety checks
+    const totalLeadsContacted = Array.isArray(leadsData) ? leadsData.length : 0;
+    const meetingsBooked = Array.isArray(leadsData) ? leadsData.filter(lead => 
+      lead?.status === 'Meeting Booked' || lead?.status === 'Meeting Done'
+    ).length : 0;
+const dealsClosedCount = Array.isArray(dealsData) ? dealsData.filter(deal =>
       deal.status === 'Closed Won'
-    ).length;
+    ).length : 0;
     const conversionRate = totalLeadsContacted > 0 
       ? ((dealsClosedCount / totalLeadsContacted) * 100).toFixed(1)
       : '0.0';
 
     // Calculate trends (comparing to previous period - simplified calculation)
     const currentMonth = new Date().getMonth();
-    const currentMonthLeads = leadsData.filter(lead => {
+const currentMonthLeads = Array.isArray(leadsData) ? leadsData.filter(lead => {
       const leadDate = new Date(lead.createdAt);
       return leadDate.getMonth() === currentMonth;
     }).length;
-    const currentMonthDeals = dealsData.filter(deal => {
+const currentMonthDeals = Array.isArray(dealsData) ? dealsData.filter(deal => {
       const dealDate = new Date(deal.updatedAt || deal.createdAt);
       return dealDate.getMonth() === currentMonth && deal.status === 'Closed Won';
     }).length;
@@ -239,15 +247,18 @@ export const getLeadPerformanceChart = async () => {
     series: [{ name: 'Leads', data: [12, 19, 15, 27, 22, 31, 28] }]
   };
   
-  return safeServiceCall(async () => {
+return safeServiceCall(async () => {
     const { getLeads } = await import("@/services/api/leadsService");
-    const leadsData = await getLeads();
+    const leadsResponse = await getLeads();
     
-    if (!leadsData?.leads || !Array.isArray(leadsData.leads)) {
+    // Extract leads array with proper fallback handling
+    const leadsData = Array.isArray(leadsResponse) ? leadsResponse : (leadsResponse?.leads || []);
+    
+    if (!Array.isArray(leadsData) || leadsData.length === 0) {
       return fallback;
     }
     
-    const leads = leadsData.leads;
+    const leads = leadsData;
     
     // Group leads by day of week for the last 7 days
     const today = new Date();
@@ -471,15 +482,17 @@ export const getUserLeadsReport = async (userId, period = 'today') => {
   const fallback = [];
   
   return safeServiceCall(async () => {
-    const { getLeads } = await import("@/services/api/leadsService");
-    const leadsData = await getLeads();
+const { getLeads } = await import("@/services/api/leadsService");
+    const leadsResponse = await getLeads();
     
-    if (!leadsData?.leads || !Array.isArray(leadsData.leads)) {
+    // Extract leads array with consistent pattern
+    const leadsData = Array.isArray(leadsResponse) ? leadsResponse : (leadsResponse?.leads || []);
+    
+    if (!Array.isArray(leadsData)) {
       return fallback;
     }
     
-    const allLeads = leadsData.leads;
-    
+    const allLeads = leadsData;
     // Filter leads by user
     const userLeads = allLeads.filter(lead => 
       lead.addedBy === validUserId
