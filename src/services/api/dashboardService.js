@@ -1,4 +1,4 @@
-import React from "react";
+// Dashboard service utilities
 import { getLeads, getPendingFollowUps } from "@/services/api/leadsService";
 import { getWebsiteUrlActivity } from "@/services/api/reportService";
 import { getContacts } from "@/services/api/contactsService";
@@ -128,15 +128,7 @@ const validateUserId = (userId) => {
 
 // Core dashboard metrics from static data
 
-// Helper function for safe service calls
-const safeServiceCall = async (serviceCall, fallback) => {
-  try {
-    return await serviceCall();
-  } catch (error) {
-    console.error('Service call failed:', error);
-    return fallback;
-  }
-};
+// Removed duplicate safeServiceCall function declaration
 
 // Helper function to validate user ID
 const validateUserId = (userId) => {
