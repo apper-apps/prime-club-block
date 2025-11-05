@@ -116,7 +116,7 @@ const currentMonthLeads = Array.isArray(leadsData) ? leadsData.filter(lead => {
 const currentMonthDeals = Array.isArray(dealsData) ? dealsData.filter(deal => {
       const dealDate = new Date(deal.updatedAt || deal.createdAt);
       return dealDate.getMonth() === currentMonth && deal.status === 'Closed Won';
-    }).length;
+    }).length : 0;
 
     // Generate trend calculations (simplified)
     const leadsTrend = currentMonthLeads > 0 ? Math.min(Math.floor(Math.random() * 20) + 5, 25) : 0;
