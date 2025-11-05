@@ -133,7 +133,7 @@ const validateUserId = (userId) => {
 // Helper function to validate user ID
 
 // Helper function to get date ranges
-const getDateRange = (period) => {
+const getDateRangeHelper = (period) => {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   
