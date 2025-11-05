@@ -97,14 +97,15 @@ const handleStatusChange = async (leadId, newStatus) => {
         )
       );
       
-      // Define status-to-stage mapping for common statuses
-const statusToStageMap = {
+// Define status-to-stage mapping for common statuses
+      const statusToStageMap = {
         "Connected": "Connected",
         "Locked": "Locked", 
         "Meeting Booked": "Meeting Booked",
         "Meeting Done": "Meeting Done",
         "Negotiation": "Negotiation",
-        "Closed Lost": "Closed Lost"
+        "Closed": "Closed Won",
+        "Lost": "Closed Lost"
       };
       
       // Check if status maps to a pipeline stage
@@ -112,17 +113,21 @@ const statusToStageMap = {
       
       if (targetStage) {
         try {
-          // Get current deals to check if one exists for this lead
+// Get current deals to check if one exists for this lead
           const currentDeals = await getDeals();
-const existingDeal = currentDeals.find(deal => deal.leadId === leadId.toString() || deal.leadId === leadId || parseInt(deal.leadId) === parseInt(leadId));
+          const existingDeal = currentDeals.find(deal => 
+            deal.leadId === leadId.toString() || 
+            deal.leadId === leadId || 
+            parseInt(deal.leadId) === parseInt(leadId)
+          );
           
           if (existingDeal) {
             // Update existing deal to the new stage
-await updateDeal(existingDeal.Id, { stage: targetStage, leadId: leadId.toString() });
-toast.success(`Lead status updated and deal moved to ${targetStage} stage!`);
+            await updateDeal(existingDeal.Id, { stage: targetStage, leadId: leadId.toString() });
+            toast.success(`Lead status updated and deal moved to ${targetStage} stage!`);
           } else {
 // Create new deal in the target stage
-const dealData = {
+            const dealData = {
               name: updatedLead.productName || `${updatedLead.websiteUrl} Deal`,
               leadName: updatedLead.name || updatedLead.websiteUrl.replace(/^https?:\/\//, '').replace(/\/$/, ''),
               leadId: leadId.toString(),
@@ -134,6 +139,7 @@ const dealData = {
               edition: updatedLead.edition || "Select Edition"
             };
             await createDeal(dealData);
+            toast.success(`Lead status updated and new deal created in ${targetStage} stage!`);
           }
         } catch (dealError) {
           console.error("Failed to handle deal operation:", dealError);

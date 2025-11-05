@@ -261,9 +261,9 @@ export const updateLead = async (id, updates) => {
           if (record.message) throw new Error(record.message);
         });
       }
-      
-      if (successful.length > 0) {
+if (successful.length > 0) {
         const updatedLead = successful[0].data;
+        // Transform back to UI format
         // Transform back to UI format
         return {
           Id: updatedLead.Id,
