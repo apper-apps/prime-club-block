@@ -114,11 +114,11 @@ const handleStatusChange = async (leadId, newStatus) => {
         try {
           // Get current deals to check if one exists for this lead
           const currentDeals = await getDeals();
-          const existingDeal = currentDeals.find(deal => deal.leadId === leadId.toString());
+const existingDeal = currentDeals.find(deal => deal.leadId === leadId.toString() || deal.leadId === leadId || parseInt(deal.leadId) === parseInt(leadId));
           
           if (existingDeal) {
             // Update existing deal to the new stage
-            await updateDeal(existingDeal.Id, { stage: targetStage });
+await updateDeal(existingDeal.Id, { stage: targetStage, leadId: leadId.toString() });
 toast.success(`Lead status updated and deal moved to ${targetStage} stage!`);
           } else {
 // Create new deal in the target stage

@@ -114,7 +114,7 @@ export const getDealById = async (id) => {
       leadId: deal.lead_id_c || "",
       value: deal.value_c || 0,
       stage: deal.stage_c || "",
-      assignedRep: deal.assigned_rep_c || "",
+assignedRep: deal.assigned_rep_c?.Name || deal.assigned_rep_c || "",
       startMonth: deal.start_month_c || new Date().getMonth() + 1,
       endMonth: deal.end_month_c || new Date().getMonth() + 3,
       edition: deal.edition_c || "",
@@ -140,7 +140,7 @@ export const createDeal = async (dealData) => {
     const recordData = {
       name_c: dealData.name || "",
       lead_name_c: dealData.leadName || "",
-      lead_id_c: dealData.leadId || "",
+lead_id_c: dealData.leadId ? dealData.leadId.toString() : "",
       value_c: dealData.value || 0,
       stage_c: dealData.stage || "",
       assigned_rep_c: dealData.assignedRep || "",
@@ -212,7 +212,7 @@ export const updateDeal = async (id, updates) => {
     const updateData = {};
     if (updates.name !== undefined) updateData.name_c = updates.name;
     if (updates.leadName !== undefined) updateData.lead_name_c = updates.leadName;
-    if (updates.leadId !== undefined) updateData.lead_id_c = updates.leadId;
+if (updates.leadId !== undefined) updateData.lead_id_c = updates.leadId ? updates.leadId.toString() : "";
     if (updates.value !== undefined) updateData.value_c = updates.value;
     if (updates.stage !== undefined) updateData.stage_c = updates.stage;
     if (updates.assignedRep !== undefined) updateData.assigned_rep_c = updates.assignedRep;

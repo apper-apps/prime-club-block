@@ -82,7 +82,7 @@ const Hotlist = () => {
       const targetStage = statusToStageMap[newStatus];
       if (targetStage) {
         const currentDeals = await getDeals();
-        const existingDeal = currentDeals.find(deal => deal.leadId === leadId);
+const existingDeal = currentDeals.find(deal => deal.leadId === leadId.toString() || deal.leadId === leadId || parseInt(deal.leadId) === parseInt(leadId));
         
         if (existingDeal) {
           await updateDeal(existingDeal.Id, { stage: targetStage });
@@ -92,8 +92,9 @@ const Hotlist = () => {
             name: `${updatedLead.websiteUrl.replace('https://', '').replace('www.', '')} - ${updatedLead.category}`,
             leadName: updatedLead.websiteUrl.replace('https://', '').replace('www.', ''),
             leadId: updatedLead.Id,
-            value: updatedLead.arr || 0,
+value: parseFloat(updatedLead.arr) || 0,
             stage: targetStage,
+            leadId: leadId.toString(),
             assignedRep: 'Unassigned',
             startMonth: new Date().toISOString().split('T')[0],
             endMonth: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
