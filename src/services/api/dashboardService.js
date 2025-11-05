@@ -7,6 +7,7 @@ import { getContacts } from "@/services/api/contactsService";
 import { getDeals } from "@/services/api/dealsService";
 import { getLeadsAnalytics, getUserPerformance } from "@/services/api/analyticsService";
 import Error from "@/components/ui/Error";
+
 // Dashboard Service - Centralized data management for dashboard components
 
 // Standardized API delay for consistent UX
@@ -111,7 +112,7 @@ const dealsClosedCount = Array.isArray(dealsData) ? dealsData.filter(deal =>
 const currentMonthLeads = Array.isArray(leadsData) ? leadsData.filter(lead => {
       const leadDate = new Date(lead.createdAt);
       return leadDate.getMonth() === currentMonth;
-    }).length;
+    }).length : 0;
 const currentMonthDeals = Array.isArray(dealsData) ? dealsData.filter(deal => {
       const dealDate = new Date(deal.updatedAt || deal.createdAt);
       return dealDate.getMonth() === currentMonth && deal.status === 'Closed Won';
