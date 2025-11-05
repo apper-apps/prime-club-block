@@ -43,11 +43,20 @@ useEffect(() => {
     loadDeals();
   }, [selectedYear]);
 
-  const handleDealUpdate = (dealId, updates) => {
-    setDeals(prev => prev.map(deal => 
-      deal.Id === dealId ? { ...deal, ...updates } : deal
-    ));
-    toast.success("Deal timeline updated");
+const handleDealUpdate = async (dealId, updates) => {
+    try {
+      const { updateDeal } = await import("@/services/api/dealsService");
+      const updatedDeal = await updateDeal(dealId, updates);
+      
+      if (updatedDeal) {
+        setDeals(prev => prev.map(deal => 
+          deal.Id === dealId ? updatedDeal : deal
+        ));
+        toast.success("Deal timeline updated");
+      }
+    } catch (error) {
+      toast.error("Failed to update deal timeline");
+    }
   };
 
 const getDealsForMonth = (monthIndex) => {

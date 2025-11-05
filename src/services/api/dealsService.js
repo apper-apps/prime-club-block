@@ -31,12 +31,11 @@ export const getDealById = async (id) => {
   
   return { ...deal };
 };
-
 export const createDeal = async (dealData) => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
   
-  const maxId = Math.max(...deals.map(d => d.Id));
+  const maxId = Math.max(...deals.map(d => d.Id), 0);
   const newDeal = {
     ...dealData,
     Id: maxId + 1,
@@ -51,7 +50,7 @@ export const updateDeal = async (id, updates) => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
   
-  const index = deals.findIndex(d => d.Id === id);
+  const index = deals.findIndex(d => d.Id === parseInt(id));
   if (index === -1) {
     throw new Error("Deal not found");
   }
@@ -64,7 +63,7 @@ export const deleteDeal = async (id) => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
   
-  const index = deals.findIndex(d => d.Id === id);
+  const index = deals.findIndex(d => d.Id === parseInt(id));
   if (index === -1) {
     throw new Error("Deal not found");
   }

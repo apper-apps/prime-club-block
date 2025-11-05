@@ -86,13 +86,20 @@ const Pipeline = () => {
     setShowEditModal(true);
   };
 
-  const handleSaveDeal = async (dealId, updatedData) => {
-    const updatedDeal = await updateDeal(dealId, updatedData);
-    
-    const updatedDeals = deals.map(deal =>
-      deal.Id === dealId ? { ...deal, ...updatedData } : deal
-    );
-    setDeals(updatedDeals);
+const handleSaveDeal = async (dealId, updatedData) => {
+    try {
+      const { updateDeal } = await import("@/services/api/dealsService");
+      const updatedDeal = await updateDeal(dealId, updatedData);
+      
+      if (updatedDeal) {
+        setDeals(prev => prev.map(deal =>
+          deal.Id === dealId ? updatedDeal : deal
+        ));
+        toast.success("Deal updated successfully");
+      }
+    } catch (error) {
+      toast.error("Failed to update deal");
+    }
   };
 
   const handleCloseEditModal = () => {
